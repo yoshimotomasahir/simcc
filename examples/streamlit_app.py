@@ -20,13 +20,14 @@ with col4:
 
 st.write("Materials:")
 materials = []
-initialMaterial = {1: 0, 2: 1, 3: 2, 4: 3, 5: 2}
-initialThickness = {1: 2.0, 2: 1.0, 3: 0.048, 4: 0.1, 5: 0.048}
-for i in range(1, 6):
+initialMaterial = {1: 0, 2: 1, 3: 2, 4: 3, 5: 2, 6: 2}
+initialThickness = {1: 2.0, 2: 1.0, 3: 0.048, 4: 0.1, 5: 0.048, 6: 0.096}
+initialChargeState = {1: 0, 2: 2, 3: 0, 4: 0, 5: 0, 6: 0}
+for i in range(1, 7):
     col1, col2, col3 = st.columns(3)
     with col1:
         material = st.selectbox(
-            f"Material {i}",
+            f"Material",
             options=[
                 "Be",
                 "Al",
@@ -35,8 +36,8 @@ for i in range(1, 6):
                 "Kapton",
                 "P10",
                 "Xe7",
+                "Diamond",
                 "Gold",
-                "Carbon",
             ],
             index=initialMaterial[i],
             key=f"material_{i}",
@@ -51,13 +52,27 @@ for i in range(1, 6):
             key=f"thickness_{i}",
             format="%.3f",
         )
-    materials.append({"Material": material, "Thickness": thickness})
+    with col3:
+        chargeState = st.selectbox(
+            f"Charge state selected after passage",
+            options=[
+                "All",
+                "Full-strip",
+                "H-like",
+                "He-like",
+            ],
+            index=initialChargeState[i],
+            key=f"charge_state_{i}",
+        )
+    materials.append(
+        {"Material": material, "Thickness": thickness, "ChargeState": chargeState}
+    )
 
 if st.button("Execute Calculation"):
     st.write("### Calculation Results")
 
-    histories = None
     Ein = energy
+    Transmission = 1.0
     for i, material in enumerate(materials, start=1):
         if material["Thickness"] == 0:
             continue
@@ -69,8 +84,11 @@ if st.button("Execute Calculation"):
         )
 
         st.write(
-            f"#### {A}{z2symbol[Z]}{f'{Q}+' if histories is None else ''} {Ein:.1f} MeV/u into {material['Material']} {thicknessStr}"
+            f"#### $^{{{A}}}${z2symbol[Z]}$^{{{Q}+}}$ {Ein:.1f} MeV/u into {material['Material']} {thicknessStr}"
         )
+
+        if Q is not "All":
+            histories = None
 
         dEtotal, dEcol, dEcc, charges, histories = GetDeltaE(
             A,
@@ -102,5 +120,18 @@ if st.button("Execute Calculation"):
         ax.set_title("Energy loss distribution")
         ax.set_xlim(*histRange)
         st.pyplot(fig)
+
+        if material["ChargeState"] == "All":
+            Q = material["ChargeState"]
+        elif material["ChargeState"] == "Full-strip":
+            Q = Z
+            Transmission *= charges[Q][-1]
+        elif material["ChargeState"] == "H-like":
+            Q = Z - 1
+            Transmission *= charges[Q][-1]
+        elif material["ChargeState"] == "He-like":
+            Q = Z - 2
+            Transmission *= charges[Q][-1]
+        st.write(f"Transmission: {Transmission:.2%}")
 
     st.success("Calculation executed successfully!")
