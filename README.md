@@ -1,9 +1,16 @@
 # SimCC
-SimCCは、物質中の電荷状態の変化をシミュレーションするためのツールです
+SimCCは物質中の電荷状態の変化をシミュレーションするためのPythonコードです。
 
 ## Dependencies
+
+必須
 - pycatima
 - numpy
+
+オプション
+- jupyter
+- streamlit
+- matplotlib
 
 ## Features
 - 電荷変化断面積や平均自由行程を計算
@@ -11,7 +18,7 @@ SimCCは、物質中の電荷状態の変化をシミュレーションするた
 - 物質中のエネルギーロスを計算
 
 ## Getting Started
-To get started with SimCC, follow these steps:
+SimCCのインストールステップ
 
 1. Clone the repository:
     ```sh
@@ -25,11 +32,14 @@ To get started with SimCC, follow these steps:
     ```sh
     pip install .
     ```
-4. Run the calculator:
+
+`error: externally-managed-environment` などと怒られたときは、 仮想環境をセットアップするか、`--break-system-packages`オプションをつけてインストールしてください。
 
 ## Usage
 
 examples に Jupyter と streamlit 用のサンプルファイルあり。
+
+streamlit を実行するには、
 
 ```sh
 pip install streamlit
