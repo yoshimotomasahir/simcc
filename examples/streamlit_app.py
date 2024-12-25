@@ -103,7 +103,7 @@ if st.button("Execute Calculation"):
         fig, axes = plt.subplots(ncols=2, figsize=(10, 4))
         ax = axes[0]
         for q in range(Z, Z - 4, -1):
-            ax.plot(charges["length"], charges[q], label=f"Q={q}")
+            ax.plot(charges["length"] * 10, charges[q], label=f"Q={q}")
         ax.legend()
         ax.set_xlabel("Thickness [mm]")
         ax.set_xlim(0, None)
