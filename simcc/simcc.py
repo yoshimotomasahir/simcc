@@ -231,15 +231,15 @@ def GetMaterial(material, density_factor=1):
             solid_gas="gas"
             zts,m_fractions = [54],[1]
             density=0.001*5.495 #PDG 5.483 (20deg 1atm)
-        elif material == "Au":
+        elif material == "Au" or material == "Gold":
             solid_gas="solid"
             zts,m_fractions = [79],[1]
             density=19.32
-        elif material == "Be":
+        elif material == "Be" or material == "Beryllium":
             solid_gas="solid"
             zts,m_fractions = [4],[1]
             density=1.848
-        elif material == "Al":
+        elif material == "Al" or material == "Aluminium" or material == "Aluminum":
             solid_gas="solid"
             zts,m_fractions = [13],[1]
             density=2.702
