@@ -87,7 +87,7 @@ if st.button("Execute Calculation"):
             f"#### $^{{{A}}}${z2symbol[Z]}$^{{{Q}+}}$ {Ein:.1f} MeV/u into {material['Material']} {thicknessStr}"
         )
 
-        if Q is not "All":
+        if Q != "All":
             histories = None
 
         dEtotal, dEcol, dEcc, charges, histories = GetDeltaE(
