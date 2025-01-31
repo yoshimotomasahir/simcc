@@ -1,24 +1,24 @@
 # SimCC
-SimCCは物質中の電荷状態の変化をシミュレーションするためのPythonコードです。
+SimCC is a Python package for simulating charge-state changes in materials.
 
 ## Dependencies
 
-必須
+Required:
 - pycatima
 - numpy
 
-オプション
+Optional:
 - jupyter
 - streamlit
 - matplotlib
 
 ## Features
-- 電荷変化断面積や平均自由行程を計算
-- MC法で物質中の電荷状態変化を計算
-- 物質中のエネルギーロスを計算
+- Calculate charge-changing cross-sections and mean free paths
+- Simulate charge-state changes in materials using the Monte Carlo method
+- Calculate energy loss in materials
 
 ## Getting Started
-SimCCのインストールステップ
+Follow these steps to install SimCC:
 
 1. Clone the repository:
     ```sh
@@ -28,21 +28,17 @@ SimCCのインストールステップ
     ```sh
     cd simcc
     ```
-3. pipでインストール:
+3. Install using pip:
     ```sh
     pip install .
     ```
-
-`error: externally-managed-environment` などと怒られたときは、 仮想環境をセットアップするか、`--break-system-packages`オプションをつけてインストールしてください。
-
 ## Usage
 
-examples に Jupyter と streamlit 用のサンプルファイルあり。
+Example files for Jupyter and Streamlit are available in the examples directory.
 
-streamlit を実行するには、
+To run Streamlit, execute the following commands:
 
 ```sh
-pip install streamlit
-pip install matplotlib
+pip install streamlit matplotlib
 streamlit run ./examples/streamlit_app.py
 ```
