@@ -1,6 +1,6 @@
 import pycatima as catima
 import numpy as np
-from .simcc import GetMaterial, GetMFP, GetChargeHistories, CalculateDeltaEWithChargeChanging, GetCharge
+from simcc import GetMaterial, GetMFP, GetChargeHistories, CalculateDeltaEWithChargeChanging, GetCharge
 
 
 def GetCAtimaCompound(zts, m_fractions):
