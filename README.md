@@ -40,5 +40,5 @@ To run Streamlit, execute the following commands:
 
 ```sh
 pip install streamlit matplotlib
-streamlit run ./examples/streamlit_app.py
+streamlit run ./examples/app.py
 ```

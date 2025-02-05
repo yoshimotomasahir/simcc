@@ -8,11 +8,11 @@ from simcc import *
 st.write("Projectile:")
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    A = st.number_input("Mass number A", min_value=1, max_value=300, value=200, step=1)
+    A = st.number_input("Mass number A", min_value=1, max_value=300, value=170, step=1)
 with col2:
-    Z = st.number_input("Atomic number Z", min_value=1, max_value=120, value=80, step=1)
+    Z = st.number_input("Atomic number Z", min_value=1, max_value=120, value=63, step=1)
 with col3:
-    Q = st.number_input("Charge Q", min_value=1, max_value=120, value=80, step=1)
+    Q = st.number_input("Charge Q", min_value=1, max_value=120, value=63, step=1)
 with col4:
     energy = st.number_input(
         "Energy [MeV/u]", min_value=100.0, max_value=1000.0, value=300.0, step=5.0
