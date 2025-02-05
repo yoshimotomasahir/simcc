@@ -11,12 +11,12 @@ periodic_table = ["H", "He",\
 "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"]
 
 z2symbol = {}
-for z,symbol in zip(range(1,len(periodic_table)+1),periodic_table):
-    z2symbol[z]=symbol
+for z, symbol in zip(range(1, len(periodic_table) + 1), periodic_table):
+    z2symbol[z] = symbol
 
 symbol2z = {}
-for z,symbol in zip(range(1,len(periodic_table)+1),periodic_table):
-    symbol2z[symbol]=z
+for z, symbol in zip(range(1, len(periodic_table) + 1), periodic_table):
+    symbol2z[symbol] = z
 
 standard_weights = [1.008, 4.003,\
 6.941, 9.012, 10.81, 12.01, 14.01, 16.00, 19.00, 20.18,\
@@ -31,87 +31,92 @@ standard_weights = [1.008, 4.003,\
 267, 268, 271, 272, 277, 276, 281, 280, 285, 278, 289, 289, 293, 293, 294]
 
 z2weight = {}
-for z,standard_weight in zip(range(1,len(standard_weights)+1),standard_weights):
-    z2weight[z]=standard_weight
+for z, standard_weight in zip(range(1, len(standard_weights) + 1), standard_weights):
+    z2weight[z] = standard_weight
+
 
 def ParseCS(zp, energy, zt, solid_gas, n_line):
-    '''
+    """
     断面積ファイルから断面積を得る
-    '''
+    """
     import os
+
     with open(f"{os.path.dirname(__file__)}/ChargeStates/CS_{zp}_{solid_gas}.txt") as f:
         line = f.readlines()[n_line]
-    cs={}
-    strs=line.split()
-    assert(str(zp)==strs[0])
-    assert(str(energy)==strs[1])
-    assert(str(zt)==strs[2])
-    cs[f"{zp-0}->{zp-1}"]=float(strs[3])
-    cs[f"{zp-1}->{zp-0}"]=float(strs[4])
-    cs[f"{zp-1}->{zp-2}"]=float(strs[5])
-    cs[f"{zp-2}->{zp-1}"]=float(strs[6])
-    cs[f"{zp-2}->{zp-3}"]=float(strs[7])
-    cs[f"{zp-3}->{zp-2}"]=float(strs[8])
-    cs[f"{zp-3}->{zp-4}"]=float(strs[9])
-    cs[f"{zp-4}->{zp-3}"]=float(strs[10])
-    cs[f"{zp-4}->{zp-5}"]=float(strs[11])
-    cs[f"{zp-5}->{zp-4}"]=float(strs[12])
-    cs[f"{zp-5}->{zp-6}"]=float(strs[13])
-    cs[f"{zp-6}->{zp-5}"]=float(strs[14])
+    cs = {}
+    strs = line.split()
+    assert str(zp) == strs[0]
+    assert str(energy) == strs[1]
+    assert str(zt) == strs[2]
+    cs[f"{zp-0}->{zp-1}"] = float(strs[3])
+    cs[f"{zp-1}->{zp-0}"] = float(strs[4])
+    cs[f"{zp-1}->{zp-2}"] = float(strs[5])
+    cs[f"{zp-2}->{zp-1}"] = float(strs[6])
+    cs[f"{zp-2}->{zp-3}"] = float(strs[7])
+    cs[f"{zp-3}->{zp-2}"] = float(strs[8])
+    cs[f"{zp-3}->{zp-4}"] = float(strs[9])
+    cs[f"{zp-4}->{zp-3}"] = float(strs[10])
+    cs[f"{zp-4}->{zp-5}"] = float(strs[11])
+    cs[f"{zp-5}->{zp-4}"] = float(strs[12])
+    cs[f"{zp-5}->{zp-6}"] = float(strs[13])
+    cs[f"{zp-6}->{zp-5}"] = float(strs[14])
     return cs
 
+
 def GetCS(zp, energy, zt, solid_gas="solid"):
-    '''
+    """
     Projectile (Z=zp, energy [MeV/u]) を Target (Z=zt) に入射したときの電荷変化断面積を得る
     zpは29以上94以下
     energy は 50 MeV/u以上、1000 MeV/u以下
     断面積の単位はbarn
-    '''
-    assert(energy>=50 and energy<=1000)
-    assert(zp>=29 and zp<=94)
-    assert(zt>=1 and zt<=94)
-    assert(solid_gas in ["solid","gas"])
-    
-    n_line = 1 + (zt-1)*191+(int(energy)-50)//5
-    
-    if str(energy) in [str(a) for a in range(50,1001,5)]:
-        return ParseCS(zp, energy, zt, solid_gas,n_line)
+    """
+    assert energy >= 50 and energy <= 1000
+    assert zp >= 29 and zp <= 94
+    assert zt >= 1 and zt <= 94
+    assert solid_gas in ["solid", "gas"]
+
+    n_line = 1 + (zt - 1) * 191 + (int(energy) - 50) // 5
+
+    if str(energy) in [str(a) for a in range(50, 1001, 5)]:
+        return ParseCS(zp, energy, zt, solid_gas, n_line)
     else:
-        e1=((int(energy))//5+0)*5
-        e2=((int(energy))//5+1)*5
-        cs1 = ParseCS(zp, e1, zt, solid_gas, n_line+0)
-        cs2 = ParseCS(zp, e2, zt, solid_gas, n_line+1)
-        cs={}
-        for key,value1,value2 in zip(cs1.keys(),cs1.values(),cs2.values()):
-            cs[key]=value1*(e2-energy)/(e2-e1)+value2*(energy-e1)/(e2-e1)
+        e1 = ((int(energy)) // 5 + 0) * 5
+        e2 = ((int(energy)) // 5 + 1) * 5
+        cs1 = ParseCS(zp, e1, zt, solid_gas, n_line + 0)
+        cs2 = ParseCS(zp, e2, zt, solid_gas, n_line + 1)
+        cs = {}
+        for key, value1, value2 in zip(cs1.keys(), cs1.values(), cs2.values()):
+            cs[key] = value1 * (e2 - energy) / (e2 - e1) + value2 * (energy - e1) / (e2 - e1)
         return cs
 
+
 def GetPureMFP(zp, energy, zt, solid_gas="solid", density=1):
-    '''
+    """
     Projectile (Z=zp, energy [MeV/u]) を Target (Z=zt) に入射したときの電荷変化平均自由行程を得る
     densityの単位はg/cm3で、値を正しく入れたときの平均自由行程の単位はcm
     densityを指定しない場合は、平均自由行程の単位はg/cm2
-    '''
+    """
     cs = GetCS(zp, energy, zt, solid_gas)
-    u=1.66054e-24 #g
-    mfp={}
-    for key,value in cs.items():
-        mfp[key]=z2weight[zt]*u / (value * density)*1e24
+    u = 1.66054e-24  # g
+    mfp = {}
+    for key, value in cs.items():
+        mfp[key] = z2weight[zt] * u / (value * density) * 1e24
     return mfp
 
+
 def GetMixedMFP(zp, energy, zts, m_fractions, solid_gas="solid", density=1):
-    '''
+    """
     Projectile (Z=zp, energy [MeV/u]) を Target 混合物 に入射したときの電荷変化平均自由行程を得る
     混合物は Zの組と 個数比で指定する。質量比ではない
     densityの単位はg/cm3で、値を正しく入れたときの平均自由行程の単位はcm
     densityを指定しない場合は、平均自由行程の単位はg/cm2
-    '''
+    """
     MFPs = {}
     MFP = {}
-    assert(len(zts) == len(m_fractions))
-    fractions=[]
-    for zt,m_f in zip(zts,m_fractions):
-        fractions.append(z2weight[zt]*m_f)
+    assert len(zts) == len(m_fractions)
+    fractions = []
+    for zt, m_f in zip(zts, m_fractions):
+        fractions.append(z2weight[zt] * m_f)
     sum_fractions = sum(fractions)
     for zt in zts:
         MFPBuf = GetPureMFP(zp, energy, zt, solid_gas, 1)
@@ -120,204 +125,213 @@ def GetMixedMFP(zp, energy, zts, m_fractions, solid_gas="solid", density=1):
                 MFPs[a[0]] = []
             MFPs[a[0]].append(a[1])
     for a in MFPs.items():
-        sum_cs=0
+        sum_cs = 0
         for i, b in enumerate(a[1]):
-            sum_cs += 1/b*fractions[i]/sum_fractions
-        MFP[a[0]] = 1/sum_cs / density
+            sum_cs += 1 / b * fractions[i] / sum_fractions
+        MFP[a[0]] = 1 / sum_cs / density
     return MFP
+
 
 def GetMaterial(material, density_factor=1):
 
-    if type(material) == int: material = str(material)
+    if type(material) == int:
+        material = str(material)
 
-    if len(material.split())==3 and material.split()[2] == "Torr":
-        density_factor = float(material.split()[1])/760
-    if len(material.split())>=2:
+    if len(material.split()) == 3 and material.split()[2] == "Torr":
+        density_factor = float(material.split()[1]) / 760
+    if len(material.split()) >= 2:
         material = material.split()[0]
 
-    densities = {"CH4":0.667, "PureAr":1.662, "PureXe":5.46}
+    densities = {"CH4": 0.667, "PureAr": 1.662, "PureXe": 5.46}
     if material == "CH4" or material == "Methane":
-        solid_gas="gas"
-        density = 0.001*densities["CH4"] #PDG 0.667 (20deg 1atm) #CATIMAと密度が異なる
-        zts,m_fractions = [6,1],[1,4]
+        solid_gas = "gas"
+        density = 0.001 * densities["CH4"]  # PDG 0.667 (20deg 1atm) #CATIMAと密度が異なる
+        zts, m_fractions = [6, 1], [1, 4]
 
     elif material == "CF4":
-        solid_gas="gas"
-        density = 0.001*3.78 #PDG 3.78 (20deg 1atm)
-        zts,m_fractions = [6,9],[1,4]
-        
+        solid_gas = "gas"
+        density = 0.001 * 3.78  # PDG 3.78 (20deg 1atm)
+        zts, m_fractions = [6, 9], [1, 4]
+
     elif material == "iC4H10" or material == "Isobutane":
-        solid_gas="gas"
-        density = 0.001*2.49
-        zts,m_fractions = [6,1],[4,10]
-        
+        solid_gas = "gas"
+        density = 0.001 * 2.49
+        zts, m_fractions = [6, 1], [4, 10]
+
     elif material == "P10" or material == "CH4Ar9":
-        solid_gas="gas"
-        density = 0.001*(densities["CH4"]*0.1+densities["PureAr"]*0.9)
-        zts,m_fractions = [6,1,18],[1,1*4,9]
+        solid_gas = "gas"
+        density = 0.001 * (densities["CH4"] * 0.1 + densities["PureAr"] * 0.9)
+        zts, m_fractions = [6, 1, 18], [1, 1 * 4, 9]
 
     elif material == "(CH4)1Xe9" or material == "CH4Xe9" or material == "Xe9":
-        solid_gas="gas"
-        density = 0.001*(densities["CH4"]*0.1+densities["PureXe"]*0.9)
-        zts,m_fractions = [6,1,54],[1,1*4,9]
-        
+        solid_gas = "gas"
+        density = 0.001 * (densities["CH4"] * 0.1 + densities["PureXe"] * 0.9)
+        zts, m_fractions = [6, 1, 54], [1, 1 * 4, 9]
+
     elif material == "(CH4)2Xe8" or material == "CH4Xe4" or material == "Xe8":
-        solid_gas="gas"
-        density = 0.001*(densities["CH4"]*0.2+densities["PureXe"]*0.8)
-        zts,m_fractions = [6,1,54],[2,2*4,8]
-        
+        solid_gas = "gas"
+        density = 0.001 * (densities["CH4"] * 0.2 + densities["PureXe"] * 0.8)
+        zts, m_fractions = [6, 1, 54], [2, 2 * 4, 8]
+
     elif material == "(CH4)3Xe7" or material == "Xe7":
-        solid_gas="gas"
-        density = 0.001*(densities["CH4"]*0.3+densities["PureXe"]*0.7)
-        zts,m_fractions = [6,1,54],[3,3*4,7]
-        
+        solid_gas = "gas"
+        density = 0.001 * (densities["CH4"] * 0.3 + densities["PureXe"] * 0.7)
+        zts, m_fractions = [6, 1, 54], [3, 3 * 4, 7]
+
     elif material == "(CH4)4Xe6" or material == "Xe6":
-        solid_gas="gas"
-        density = 0.001*(densities["CH4"]*0.4+densities["PureXe"]*0.6)
-        zts,m_fractions = [6,1,54],[4,4*4,6]
-        
-    elif material == "(CH4)5Xe5" or  material == "CH4Xe" or material == "Xe5":
-        solid_gas="gas"
-        density = 0.001*(densities["CH4"]*0.5+densities["PureXe"]*0.5)
-        zts,m_fractions = [6,1,54],[5,5*4,5]
-        
+        solid_gas = "gas"
+        density = 0.001 * (densities["CH4"] * 0.4 + densities["PureXe"] * 0.6)
+        zts, m_fractions = [6, 1, 54], [4, 4 * 4, 6]
+
+    elif material == "(CH4)5Xe5" or material == "CH4Xe" or material == "Xe5":
+        solid_gas = "gas"
+        density = 0.001 * (densities["CH4"] * 0.5 + densities["PureXe"] * 0.5)
+        zts, m_fractions = [6, 1, 54], [5, 5 * 4, 5]
+
     elif material == "Mylar":
-        solid_gas="solid"
+        solid_gas = "solid"
         density = 1.380
-        zts,m_fractions = [1,6,8],[8,10,4]#C10H8O4
-        
+        zts, m_fractions = [1, 6, 8], [8, 10, 4]  # C10H8O4
+
     elif material == "Kapton":
-        solid_gas="solid"
+        solid_gas = "solid"
         density = 1.420
-        zts,m_fractions = [1,6,7,8],[10,22,2,5]#C22H10O5N2 CATIMAと組成が異なる
-        
+        zts, m_fractions = [1, 6, 7, 8], [10, 22, 2, 5]  # C22H10O5N2 CATIMAと組成が異なる
+
     elif material == "Pla" or material == "Plastics":
-        solid_gas="solid"
+        solid_gas = "solid"
         density = 1.032
-        zts,m_fractions = [1,6],[10,9]#C9H10
-    
+        zts, m_fractions = [1, 6], [10, 9]  # C9H10
+
     elif material == "Diamond":
-        solid_gas="solid"
+        solid_gas = "solid"
         density = 3.52
-        zts,m_fractions = [6],[1]#C9H10
+        zts, m_fractions = [6], [1]  # C9H10
 
     elif material == "Lucite" or material == "Acrylic" or material == "PMMA":
-        solid_gas="solid"
+        solid_gas = "solid"
         density = 1.18
-        zts,m_fractions = [1,6,8],[8,5,2]#
-        
+        zts, m_fractions = [1, 6, 8], [8, 5, 2]  #
+
     else:
-        ZTarget=None
+        ZTarget = None
         if material == "PureHe":
-            solid_gas="gas"
-            zts,m_fractions = [2],[1]
-            density=0.001*0.179
+            solid_gas = "gas"
+            zts, m_fractions = [2], [1]
+            density = 0.001 * 0.179
         elif material == "PureNe":
-            solid_gas="gas"
-            zts,m_fractions = [10],[1]
-            density=0.001*0.839
+            solid_gas = "gas"
+            zts, m_fractions = [10], [1]
+            density = 0.001 * 0.839
         elif material == "PureAr":
-            solid_gas="gas"
-            zts,m_fractions = [18],[1]
-            density=0.001*densities["PureAr"] #PDG 1.662 (20deg 1atm)
+            solid_gas = "gas"
+            zts, m_fractions = [18], [1]
+            density = 0.001 * densities["PureAr"]  # PDG 1.662 (20deg 1atm)
         elif material == "PureKr":
-            solid_gas="gas"
-            zts,m_fractions = [36],[1]
-            density=0.001*3.4
+            solid_gas = "gas"
+            zts, m_fractions = [36], [1]
+            density = 0.001 * 3.4
         elif material == "PureXe" or material == "(CH4)0Xe10":
-            solid_gas="gas"
-            zts,m_fractions = [54],[1]
-            density=0.001*densities["PureXe"] #PDG 5.483 (20deg 1atm)
+            solid_gas = "gas"
+            zts, m_fractions = [54], [1]
+            density = 0.001 * densities["PureXe"]  # PDG 5.483 (20deg 1atm)
         elif material == "Au" or material == "Gold":
-            solid_gas="solid"
-            zts,m_fractions = [79],[1]
-            density=19.32
+            solid_gas = "solid"
+            zts, m_fractions = [79], [1]
+            density = 19.32
         elif material == "Be" or material == "Beryllium":
-            solid_gas="solid"
-            zts,m_fractions = [4],[1]
-            density=1.848
+            solid_gas = "solid"
+            zts, m_fractions = [4], [1]
+            density = 1.848
         elif material == "W" or material == "Tungsten":
-            solid_gas="solid"
-            zts,m_fractions = [74],[1]
-            density=19.3
+            solid_gas = "solid"
+            zts, m_fractions = [74], [1]
+            density = 19.3
         elif material == "Al" or material == "Aluminium" or material == "Aluminum":
-            solid_gas="solid"
-            zts,m_fractions = [13],[1]
-            density=2.702
+            solid_gas = "solid"
+            zts, m_fractions = [13], [1]
+            density = 2.702
         else:
-            if solid_gas not in ["solid","gas"]:
-                solid_gas="solid"
-            zts,m_fractions = [int(material)],[1]
-            density=1
-    return zts, m_fractions, density*density_factor, solid_gas
+            if solid_gas not in ["solid", "gas"]:
+                solid_gas = "solid"
+            zts, m_fractions = [int(material)], [1]
+            density = 1
+    return {"zts": zts, "m_fractions": m_fractions, "density": density * density_factor, "solid_gas": solid_gas}
+
 
 def GetMFP(zp, energy, material, density_factor=1, solid_gas=None):
-    '''
+    """
     物質の電荷変化平均自由行程、固体かガスか、密度を得る
     solid_gas: "gas" or "solid"
     density: g/cm3 もしmaterialを数値で与えた場合は1g/cm3になる
-    '''
-    zts, m_fractions, density, solid_gas = GetMaterial(material, density_factor)
+    """
+    result = GetMaterial(material, density_factor)
+    zts, m_fractions, density, solid_gas = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
     return GetMixedMFP(zp, energy, zts, m_fractions, solid_gas, density)
 
+
 def GetEqDistFromCS(cs):
-    '''
+    """
     断面積の比から平衡状態における電荷分布を得る
-    '''
+    """
     cs_list = list(cs.values())
     r = []
-    for i in range(0,len(cs_list),2):
-        r.append(cs_list[i+1]/cs_list[i])
+    for i in range(0, len(cs_list), 2):
+        r.append(cs_list[i + 1] / cs_list[i])
     d = 1
     for i in range(len(r)):
-        psum=1
-        for j in range(i,len(r)):
+        psum = 1
+        for j in range(i, len(r)):
             psum *= r[j]
-        d+=psum
+        d += psum
     f = [0 for _ in r]
-    f.append(1/d)
-    for i in range(len(r)-1,-1,-1):
-        f[i] = r[i]*f[i+1]
+    f.append(1 / d)
+    for i in range(len(r) - 1, -1, -1):
+        f[i] = r[i] * f[i + 1]
     return f
 
+
 def GetEqDist(MFP):
-    '''
+    """
     平均自由行程比から平衡状態における電荷分布を得る
-    '''
+    """
     cs = {}
-    for key,value in MFP.items():
-        cs[key]=1/value
+    for key, value in MFP.items():
+        cs[key] = 1 / value
     return GetEqDistFromCS(cs)
 
+
 def GetQMean(MFP):
-    '''
+    """
     平均自由行程比から平衡状態における平均電荷を得る
-    '''
+    """
     dist = GetEqDist(MFP)
     zp = int(list(MFP.keys())[0].split("-")[0])
-    sum0 = 0.
-    sum1 = 0.
+    sum0 = 0.0
+    sum1 = 0.0
     for i, f in enumerate(dist):
         sum0 = sum0 + f
-        sum1 = sum1 + f*(zp-i)
-    return sum1/sum0
+        sum1 = sum1 + f * (zp - i)
+    return sum1 / sum0
+
 
 def GetEqNcc(MFP, length):
-    '''
+    """
     平衡状態における長さあたりの平均電荷変化回数を得る
-    '''
+    """
     dist = GetEqDist(MFP)
     zp = int(list(MFP.keys())[0].split("-")[0])
     ncc_sum = 0
     for i, f in enumerate(dist):
         if f"{zp-i}->{zp-i+1}" in MFP:
-            ncc_sum += f * length/MFP[f"{zp-i}->{zp-i+1}"]
+            ncc_sum += f * length / MFP[f"{zp-i}->{zp-i+1}"]
         if f"{zp-i}->{zp-i-1}" in MFP:
-            ncc_sum += f * length/MFP[f"{zp-i}->{zp-i-1}"]
+            ncc_sum += f * length / MFP[f"{zp-i}->{zp-i-1}"]
     return ncc_sum
 
-def GetChargeHistories(MFP, initialQ, length, N = 10000, random_state = None, histories = None, ignored = False):
-    '''
+
+def GetChargeHistories(MFP, initialQ, length, N=10000, random_state=None, histories=None, ignored=False):
+    """
     平均自由行程からモンテカルロ法による電荷変化履歴を得る
     lengthは、MFPと同じ単位を与える。MFPの単位がcmならlengthもcmで
     ignored が Trueのときは、電荷変化履歴は計算するが長さは変えない
@@ -325,8 +339,8 @@ def GetChargeHistories(MFP, initialQ, length, N = 10000, random_state = None, hi
     random_state は以下のようにrsを生成して使い回す
     import numpy as np
     rs = np.random.RandomState(1)
-    '''
-    assert(random_state is not None)
+    """
+    assert random_state is not None
     rs = random_state
     zp = int(list(MFP.keys())[0].split("-")[0])
     if histories == None:
@@ -337,7 +351,7 @@ def GetChargeHistories(MFP, initialQ, length, N = 10000, random_state = None, hi
             initialQs = [initialQ for _ in range(N)]
         offset_length = 0
     else:
-        assert(len(histories) == N)
+        assert len(histories) == N
         initialQs = []
         for n in range(N):
             initialQs.append(histories[n][-1][0])
@@ -346,32 +360,36 @@ def GetChargeHistories(MFP, initialQ, length, N = 10000, random_state = None, hi
     length = length + offset_length
     for n in range(N):
         Q = initialQs[n]
-        current_length=offset_length
-        
-        history = [[Q,offset_length,"pre",zp]]#最初にだけzpを入れる
+        current_length = offset_length
+
+        history = [[Q, offset_length, "pre", zp]]  # 最初にだけzpを入れる
         while True:
-            Qp = Q+1
-            Qm = Q-1
-            
-            if f"{Q}->{Qp}" in MFP:lp = rs.exponential(MFP[f"{Q}->{Qp}"])
-            else:lp=float('inf')
-            if f"{Q}->{Qm}" in MFP:lm = rs.exponential(MFP[f"{Q}->{Qm}"])
-            else:lm=float('inf')
-            
-            if current_length+lp > length and current_length+lm > length:
-                history.append([Q, length,"post"])
+            Qp = Q + 1
+            Qm = Q - 1
+
+            if f"{Q}->{Qp}" in MFP:
+                lp = rs.exponential(MFP[f"{Q}->{Qp}"])
+            else:
+                lp = float("inf")
+            if f"{Q}->{Qm}" in MFP:
+                lm = rs.exponential(MFP[f"{Q}->{Qm}"])
+            else:
+                lm = float("inf")
+
+            if current_length + lp > length and current_length + lm > length:
+                history.append([Q, length, "post"])
                 break
-            elif lp>lm:
+            elif lp > lm:
                 current_length += lm
-                Q=Qm
-                history.append([Q, current_length,"-"])
+                Q = Qm
+                history.append([Q, current_length, "-"])
             else:
                 current_length += lp
-                Q=Qp
-                history.append([Q, current_length,"+"])
+                Q = Qp
+                history.append([Q, current_length, "+"])
         if ignored:
-            #計算した最後のQを距離0で追加する
-            if len(histories[n])>0:
+            # 計算した最後のQを距離0で追加する
+            if len(histories[n]) > 0:
                 history[-1][1] = histories[n][-1][1]
             else:
                 history[-1][1] = 0
@@ -379,126 +397,140 @@ def GetChargeHistories(MFP, initialQ, length, N = 10000, random_state = None, hi
             histories[n].append(history[0])
             histories[n].append(history[-1])
         else:
-            histories[n]+=history
+            histories[n] += history
     return histories
+
 
 def CheckLength(histories, l1, l2):
     import math
-    assert(l1<=l2)
-    if histories[0][0][1]>l1 and math.isclose(l1,histories[0][0][1]):
+
+    assert l1 <= l2
+    if histories[0][0][1] > l1 and math.isclose(l1, histories[0][0][1]):
         l1 = histories[0][0][1]
-    if l2>histories[0][-1][1] and math.isclose(l2,histories[0][-1][1]):
+    if l2 > histories[0][-1][1] and math.isclose(l2, histories[0][-1][1]):
         l2 = histories[0][-1][1]
-    assert(histories[0][0][1]<=l1)
-    assert(l2<=histories[0][-1][1])
-    return l1,l2
+    assert histories[0][0][1] <= l1
+    assert l2 <= histories[0][-1][1]
+    return l1, l2
+
 
 def GetCharge(histories, length):
-    '''
+    """
     モンテカルロ法による電荷変化履歴からlengthの位置における電荷を得る
     長さを無視して電荷状態だけ計算する場合があるため、履歴の下流から探索する
-    '''
+    """
     import math
-    Qs=[]
-    _,length = CheckLength(histories, 0, length)
+
+    Qs = []
+    _, length = CheckLength(histories, 0, length)
     for history in histories:
         for h in reversed(history):
-            if math.isclose(h[1],length):
+            if math.isclose(h[1], length):
                 Qs.append(h[0])
                 break
-            elif h[1]<length:
+            elif h[1] < length:
                 Qs.append(h[0])
                 break
-    assert(len(Qs) == len(histories))
+    assert len(Qs) == len(histories)
     return Qs
 
-def CalculateDeltaEWithChargeChanging(histories, l1, l2, dedx_list = {}):
-    '''
+
+def CalculateDeltaEWithChargeChanging(histories, l1, l2, dedx_list={}):
+    """
     電荷ごとのdE/dxから、電荷変化履歴におけるl1からl2までの実際のdEを得る
     dedx_list[zp],dedx_list[zp-1],...,dedx_list[zp-6] まで計算して与える
-    '''
-    dEs=[]
-    l1,l2 = CheckLength(histories, l1, l2)
+    """
+    dEs = []
+    l1, l2 = CheckLength(histories, l1, l2)
     for history in histories:
-        dE=0
+        dE = 0
         for i, h in enumerate(history):
-            if i==0:continue
-            if h[1] < l1:continue
+            if i == 0:
+                continue
+            if h[1] < l1:
+                continue
             if l2 < h[1]:
-                if history[i-1][1] < l1:
-                    dE += dedx_list[history[i-1][0]]*(l2-l1)
+                if history[i - 1][1] < l1:
+                    dE += dedx_list[history[i - 1][0]] * (l2 - l1)
                 else:
-                    dE += dedx_list[history[i-1][0]]*(l2-history[i-1][1])
+                    dE += dedx_list[history[i - 1][0]] * (l2 - history[i - 1][1])
                 break
             else:
-                if history[i-1][1] < l1:
-                    dE += dedx_list[history[i-1][0]]*(history[i][1]-l1)
+                if history[i - 1][1] < l1:
+                    dE += dedx_list[history[i - 1][0]] * (history[i][1] - l1)
                 else:
-                    dE += dedx_list[history[i-1][0]]*(history[i][1]-history[i-1][1])
+                    dE += dedx_list[history[i - 1][0]] * (history[i][1] - history[i - 1][1])
         dEs.append(dE)
     return dEs
 
+
 def GetChargeProbability(histories, l1, l2):
-    '''
+    """
     電荷変化履歴におけるl1からl2までの電荷状態の存在確率を得る
-    '''
+    """
     Z = histories[0][0][3]
-    Qs = [Z,Z-1,Z-2,Z-3,Z-4,Z-5,Z-6]
-    Ps=dict(zip(Qs, [[] for _ in Qs]))
-    l1,l2 = CheckLength(histories, l1, l2)
-    length = l2-l1
+    Qs = [Z, Z - 1, Z - 2, Z - 3, Z - 4, Z - 5, Z - 6]
+    Ps = dict(zip(Qs, [[] for _ in Qs]))
+    l1, l2 = CheckLength(histories, l1, l2)
+    length = l2 - l1
     for history in histories:
-        P=dict(zip(Qs, [0 for _ in Qs]))
+        P = dict(zip(Qs, [0 for _ in Qs]))
         for i, h in enumerate(history):
-            if i==0:continue
-            if h[1] < l1:continue
+            if i == 0:
+                continue
+            if h[1] < l1:
+                continue
             if l2 < h[1]:
-                if history[i-1][1] < l1:
-                    P[history[i-1][0]] += (l2-l1)/length
+                if history[i - 1][1] < l1:
+                    P[history[i - 1][0]] += (l2 - l1) / length
                 else:
-                    P[history[i-1][0]] += (l2-history[i-1][1])/length
+                    P[history[i - 1][0]] += (l2 - history[i - 1][1]) / length
                 break
             else:
-                if history[i-1][1] < l1:
-                    P[history[i-1][0]] += (history[i][1]-l1)/length
+                if history[i - 1][1] < l1:
+                    P[history[i - 1][0]] += (history[i][1] - l1) / length
                 else:
-                    P[history[i-1][0]] += (history[i][1]-history[i-1][1])/length
-        for k,v in P.items():
+                    P[history[i - 1][0]] += (history[i][1] - history[i - 1][1]) / length
+        for k, v in P.items():
             Ps[k].append(v)
     return Ps
 
+
 def GetChargeChanging(histories, l1, l2):
-    '''
+    """
     電荷変化履歴におけるl1からl2までの電荷状態の変化回数を得る
-    '''
-    l1,l2 = CheckLength(histories, l1, l2)
+    """
+    l1, l2 = CheckLength(histories, l1, l2)
     import math
-    ChargeChangings=[]
-    Qs = GetCharge(histories,l1)
+
+    ChargeChangings = []
+    Qs = GetCharge(histories, l1)
     for history, Charge in zip(histories, Qs):
-        ChargeChanging=0
+        ChargeChanging = 0
         l = l1
 
         for h in history:
-            if h[1] < l1:continue #範囲外
-            if l2 < h[1]: break #範囲外
-            if math.isclose(h[1],l): #同じ場所
+            if h[1] < l1:
+                continue  # 範囲外
+            if l2 < h[1]:
+                break  # 範囲外
+            if math.isclose(h[1], l):  # 同じ場所
                 Charge = h[0]
             else:
                 l = h[1]
-                if Charge != h[0]: #chargeが違う
+                if Charge != h[0]:  # chargeが違う
                     Charge = h[0]
                     ChargeChanging += 1
         ChargeChangings.append(ChargeChanging)
     return ChargeChangings
 
+
 def GetMeanCharge(histories, l1, l2):
-    '''
+    """
     電荷変化履歴におけるl1からl2までの平均電荷を得る
-    '''
+    """
     dedx_list = {}
     Z = histories[0][0][3]
     for dQ in range(7):
-        dedx_list[Z-dQ] = (Z-dQ)/(l2-l1)
+        dedx_list[Z - dQ] = (Z - dQ) / (l2 - l1)
     return CalculateDeltaEWithChargeChanging(histories, l1, l2, dedx_list=dedx_list)
-

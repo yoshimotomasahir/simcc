@@ -2,46 +2,49 @@ import pycatima as catima
 import numpy as np
 from .simcc import GetMaterial, GetMFP, GetChargeHistories, CalculateDeltaEWithChargeChanging, GetCharge
 
+
 def GetCAtimaCompound(zts, m_fractions):
     return [[0, z, m] for m, z in zip(m_fractions, zts)]
 
-def GetDeltaE(A,Z,Q,energy,material, length, N = 10000, random_state = None, histories = None):
-    
+
+def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, histories=None):
+
     # 電荷状態を外から与えられるようにする
     config = catima.Config()
 
     # 有効Zを有効にする
     config.z_effective = 1
-    
+
     # 電荷履歴がある場合に履歴の最後の厚みを取得
     if histories is not None:
         l1 = histories[0][-1][1]
     else:
-        l1=0
-    
+        l1 = 0
+
     # 物質情報を取得
-    zts, m_fractions, density, solid_gas = GetMaterial(material)
-    compound = GetCAtimaCompound(zts,m_fractions)
-    
+    result = GetMaterial(material)
+    zts, m_fractions, density, solid_gas = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
+    compound = GetCAtimaCompound(zts, m_fractions)
+
     # 分割数を検討
-    mat = catima.Material(compound,density=density)
+    mat = catima.Material(compound, density=density)
     mat.thickness_cm(length)
     layer = catima.Layers()
     layer.add(mat)
-    res = catima.calculate_layers(catima.Projectile(A=A ,Z=Z, Q=0, T=energy),layer,config)
-    Eloss = res.total_result.Ein-res.total_result.Eout
-    stragglingColRate = res.total_result.sigma_E/Eloss
-    nlayer = int(np.ceil(Eloss/5.0))
-    
+    res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=0, T=energy), layer, config)
+    Eloss = res.total_result.Ein - res.total_result.Eout
+    stragglingColRate = res.total_result.sigma_E / Eloss
+    nlayer = int(np.ceil(Eloss / 5.0))
+
     # 分割層ごとのエネルギーロスを計算
     layer = catima.Layers()
-    mat = catima.Material(compound,density=density)
-    mat.thickness_cm(length/nlayer)
+    mat = catima.Material(compound, density=density)
+    mat.thickness_cm(length / nlayer)
     for ilayer in range(nlayer):
         layer.add(mat)
-    res = catima.calculate_layers(catima.Projectile(A=A ,Z=Z, Q=0, T=energy),layer,config)
-    print(energy,"->",res.total_result.Eout)
-    assert(res.total_result.Eout>=50)    
+    res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=0, T=energy), layer, config)
+    print(energy, "->", res.total_result.Eout)
+    assert res.total_result.Eout >= 50
 
     # 有効Zを無効にしてQは外から与える
     config.z_effective = 0
@@ -49,52 +52,52 @@ def GetDeltaE(A,Z,Q,energy,material, length, N = 10000, random_state = None, his
     # 分割層ごと電荷変化MFPを取得
     MFPs = []
     for ilayer in range(nlayer):
-        assert(res.results[ilayer].Eout>=50)
-        ene = (res.results[ilayer].Ein+res.results[ilayer].Eout)*0.5
+        assert res.results[ilayer].Eout >= 50
+        ene = (res.results[ilayer].Ein + res.results[ilayer].Eout) * 0.5
         MFPs.append(GetMFP(Z, ene, material))
 
     # 分割層ごとに電荷履歴を計算
     rs = np.random.RandomState(1)
-    print("Calculating charge history",end=" ")
+    print("Calculating charge history", end=" ")
     for ilayer in range(nlayer):
-        print(".",end="")
-        histories = GetChargeHistories(MFPs[ilayer], Q, length/nlayer, random_state = rs, histories = histories)
+        print(".", end="")
+        histories = GetChargeHistories(MFPs[ilayer], Q, length / nlayer, random_state=rs, histories=histories)
     print()
-    
+
     # 分割層ごとにdEdxを計算
     Eout = energy
-    
+
     dEcc = np.zeros(N)
-    print("Calculating dE/dx",end=" ")
+    print("Calculating dE/dx", end=" ")
     for ilayer in range(nlayer):
-        print(".",end="")
+        print(".", end="")
         dedx_list = {}
-        for Q in range(Z-6,Z+1):
+        for Q in range(Z - 6, Z + 1):
             layer = catima.Layers()
-            mat = catima.Material(compound,density=density)
-            mat.thickness_cm(length/nlayer)
+            mat = catima.Material(compound, density=density)
+            mat.thickness_cm(length / nlayer)
             layer.add(mat)
-            res = catima.calculate_layers(catima.Projectile(A=A ,Z=Z, Q=Q, T=Eout),layer,config)
-            dedx_list[Q] = (res.total_result.Ein-res.total_result.Eout)/(length/nlayer)
-        
-        dE = CalculateDeltaEWithChargeChanging(histories, l1+ilayer*length/nlayer, l1+(ilayer+1)*length/nlayer, dedx_list)
+            res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=Q, T=Eout), layer, config)
+            dedx_list[Q] = (res.total_result.Ein - res.total_result.Eout) / (length / nlayer)
+
+        dE = CalculateDeltaEWithChargeChanging(histories, l1 + ilayer * length / nlayer, l1 + (ilayer + 1) * length / nlayer, dedx_list)
         Eout = Eout - np.mean(dE)
-        dEcc+=dE
-    dEcolRate = (1+rs.normal(loc=0, scale=stragglingColRate, size=N))
-    dEcol = np.mean(dEcc)*dEcolRate
+        dEcc += dE
+    dEcolRate = 1 + rs.normal(loc=0, scale=stragglingColRate, size=N)
+    dEcol = np.mean(dEcc) * dEcolRate
     dEtotal = dEcc * dEcolRate
     print(f" {energy:.2f} -> {energy-np.mean(dEcc):.2f} MeV/u")
-        
+
     # 電荷分布をlog scaleで20層に分けて計算
-    print("Calculating charge distribution",end=" ")
-    length_log = np.array([0]+list(np.logspace(np.log10(length/1000), np.log10(length), num=20)))
-    charges = {"length":length_log}
+    print("Calculating charge distribution", end=" ")
+    length_log = np.array([0] + list(np.logspace(np.log10(length / 1000), np.log10(length), num=20)))
+    charges = {"length": length_log}
     for l2 in length_log:
-        print(".",end="")
-        charge_snap = np.array(GetCharge(histories, l1+l2))
-        for Q in range(Z-6,Z+1):
-            if Q not in charges:charges[Q]=[]
-            charges[Q].append(np.sum(charge_snap == Q)/N)
+        print(".", end="")
+        charge_snap = np.array(GetCharge(histories, l1 + l2))
+        for Q in range(Z - 6, Z + 1):
+            if Q not in charges:
+                charges[Q] = []
+            charges[Q].append(np.sum(charge_snap == Q) / N)
     print()
-    return dEtotal, dEcol, dEcc, charges,histories
-        
+    return dEtotal, dEcol, dEcc, charges, histories
