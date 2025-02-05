@@ -1,4 +1,5 @@
 import bisect
+import numpy as np
 
 periodic_table = ["H", "He",\
 "Li", "Be", "B", "C", "N", "O", "F", "Ne",\
@@ -339,44 +340,44 @@ def GetChargeHistories(MFP, initialQ, length, N=10000, random_state=None, histor
     ignored が Trueのときは、電荷変化履歴は計算するが長さは変えない
     initialQ は 初期電荷か、電荷リストを与える
     random_state は以下のようにrsを生成して使い回す
-    import numpy as np
     rs = np.random.RandomState(1)
     """
-    assert random_state is not None
+    assert random_state is not None  # 乱数発生器の指定を確認
     rs = random_state
-    zp = int(list(MFP.keys())[0].split("-")[0])
+
+    zp = int(list(MFP.keys())[0].split("-")[0])  # 初期電荷を取得
+
     if histories == None:
         histories = [[] for _ in range(N)]
         if type(initialQ) is list:
-            initialQs = [initialQ[n] for n in range(N)]
+            initialQs = np.array(initialQ, dtype=np.int32)
         else:
-            initialQs = [initialQ for _ in range(N)]
+            initialQs = np.full(N, initialQ, dtype=np.int32)
         offset_length = 0
     else:
         assert len(histories) == N
-        initialQs = []
-        for n in range(N):
-            initialQs.append(histories[n][-1][0])
+        initialQs = np.array([histories[n][-1][0] for n in range(N)], dtype=np.int32)
         offset_length = histories[0][-1][1]
 
-    length = length + offset_length
+    length = length + offset_length  # シミュレーションの終点を設定
+
+    # MFP のキャッシュ (辞書参照回数を削減)
+    mfp_cache = {key: MFP[key] for key in MFP}
+    Qmax = max([int(key.split("->")[0]) for key in MFP])
+    Qmin = min([int(key.split("->")[0]) for key in MFP])
+    mfp_cache[f"{Qmax}->{Qmax+1}"] = float("inf")
+    mfp_cache[f"{Qmin}->{Qmin-1}"] = float("inf")
+
     for n in range(N):
         Q = initialQs[n]
         current_length = offset_length
 
         history = [[Q, offset_length, "pre", zp]]  # 最初にだけzpを入れる
         while True:
-            Qp = Q + 1
-            Qm = Q - 1
+            Qp, Qm = Q + 1, Q - 1
 
-            if f"{Q}->{Qp}" in MFP:
-                lp = rs.exponential(MFP[f"{Q}->{Qp}"])
-            else:
-                lp = float("inf")
-            if f"{Q}->{Qm}" in MFP:
-                lm = rs.exponential(MFP[f"{Q}->{Qm}"])
-            else:
-                lm = float("inf")
+            lp = rs.exponential(mfp_cache[f"{Q}->{Qp}"])
+            lm = rs.exponential(mfp_cache[f"{Q}->{Qm}"])
 
             if current_length + lp > length and current_length + lm > length:
                 history.append([Q, length, "post"])
@@ -396,8 +397,7 @@ def GetChargeHistories(MFP, initialQ, length, N=10000, random_state=None, histor
             else:
                 history[-1][1] = 0
             history[-1][2] = "ignored"
-            histories[n].append(history[0])
-            histories[n].append(history[-1])
+            histories[n] += [history[0], history[-1]]
         else:
             histories[n] += history
     return histories
