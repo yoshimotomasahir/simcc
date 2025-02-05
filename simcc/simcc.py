@@ -127,6 +127,7 @@ def GetMixedMFP(zp, energy, zts, m_fractions, solid_gas="solid", density=1):
     return MFP
 
 def GetMaterial(material, density_factor=1):
+
     if type(material) == int: material = str(material)
 
     if len(material.split())==3 and material.split()[2] == "Torr":
@@ -134,9 +135,10 @@ def GetMaterial(material, density_factor=1):
     if len(material.split())>=2:
         material = material.split()[0]
 
-    if material == "CH4":
+    densities = {"CH4":0.667, "PureAr":1.662, "PureXe":5.46}
+    if material == "CH4" or material == "Methane":
         solid_gas="gas"
-        density = 0.001*0.667 #PDG 0.667 (20deg 1atm) #CATIMAと密度が異なる
+        density = 0.001*densities["CH4"] #PDG 0.667 (20deg 1atm) #CATIMAと密度が異なる
         zts,m_fractions = [6,1],[1,4]
 
     elif material == "CF4":
@@ -151,37 +153,32 @@ def GetMaterial(material, density_factor=1):
         
     elif material == "P10" or material == "CH4Ar9":
         solid_gas="gas"
-        density = 0.001*1.66
+        density = 0.001*(densities["CH4"]*0.1+densities["PureAr"]*0.9)
         zts,m_fractions = [6,1,18],[1,1*4,9]
-        
-    elif material == "CH4Xe99" or material == "Xe99":
-        solid_gas="gas"
-        density = 0.001*5.44672
-        zts,m_fractions = [6,1,54],[1,1*4,99]
-        
+
     elif material == "(CH4)1Xe9" or material == "CH4Xe9" or material == "Xe9":
         solid_gas="gas"
-        density = 0.001*5.0122
+        density = 0.001*(densities["CH4"]*0.1+densities["PureXe"]*0.9)
         zts,m_fractions = [6,1,54],[1,1*4,9]
         
     elif material == "(CH4)2Xe8" or material == "CH4Xe4" or material == "Xe8":
         solid_gas="gas"
-        density = 0.001*4.5294
+        density = 0.001*(densities["CH4"]*0.2+densities["PureXe"]*0.8)
         zts,m_fractions = [6,1,54],[2,2*4,8]
         
     elif material == "(CH4)3Xe7" or material == "Xe7":
         solid_gas="gas"
-        density = 0.001*4.0466
+        density = 0.001*(densities["CH4"]*0.3+densities["PureXe"]*0.7)
         zts,m_fractions = [6,1,54],[3,3*4,7]
         
     elif material == "(CH4)4Xe6" or material == "Xe6":
         solid_gas="gas"
-        density = 0.001*3.5638
+        density = 0.001*(densities["CH4"]*0.4+densities["PureXe"]*0.6)
         zts,m_fractions = [6,1,54],[4,4*4,6]
         
     elif material == "(CH4)5Xe5" or  material == "CH4Xe" or material == "Xe5":
         solid_gas="gas"
-        density = 0.001*3.081
+        density = 0.001*(densities["CH4"]*0.5+densities["PureXe"]*0.5)
         zts,m_fractions = [6,1,54],[5,5*4,5]
         
     elif material == "Mylar":
@@ -222,7 +219,7 @@ def GetMaterial(material, density_factor=1):
         elif material == "PureAr":
             solid_gas="gas"
             zts,m_fractions = [18],[1]
-            density=0.001*1.66 #PDG 1.662 (20deg 1atm)
+            density=0.001*densities["PureAr"] #PDG 1.662 (20deg 1atm)
         elif material == "PureKr":
             solid_gas="gas"
             zts,m_fractions = [36],[1]
@@ -230,7 +227,7 @@ def GetMaterial(material, density_factor=1):
         elif material == "PureXe" or material == "(CH4)0Xe10":
             solid_gas="gas"
             zts,m_fractions = [54],[1]
-            density=0.001*5.495 #PDG 5.483 (20deg 1atm)
+            density=0.001*densities["PureXe"] #PDG 5.483 (20deg 1atm)
         elif material == "Au" or material == "Gold":
             solid_gas="solid"
             zts,m_fractions = [79],[1]
@@ -239,6 +236,10 @@ def GetMaterial(material, density_factor=1):
             solid_gas="solid"
             zts,m_fractions = [4],[1]
             density=1.848
+        elif material == "W" or material == "Tungsten":
+            solid_gas="solid"
+            zts,m_fractions = [74],[1]
+            density=19.3
         elif material == "Al" or material == "Aluminium" or material == "Aluminum":
             solid_gas="solid"
             zts,m_fractions = [13],[1]
