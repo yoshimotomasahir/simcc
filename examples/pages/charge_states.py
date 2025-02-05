@@ -1,4 +1,3 @@
-# "streamlit run streamlit_app.py" to run
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
