@@ -1,3 +1,5 @@
+import bisect
+
 periodic_table = ["H", "He",\
 "Li", "Be", "B", "C", "N", "O", "F", "Ne",\
 "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar",\
@@ -424,13 +426,14 @@ def GetCharge(histories, length):
     Qs = []
     _, length = CheckLength(histories, 0, length)
     for history in histories:
-        for h in reversed(history):
-            if math.isclose(h[1], length):
+        positions = [h[1] for h in history]
+        index = bisect.bisect_right(positions, length)
+
+        h = history[index - 1]
+        if index > 0:
+            if math.isclose(h[1], length) or h[1] < length:
                 Qs.append(h[0])
-                break
-            elif h[1] < length:
-                Qs.append(h[0])
-                break
+                continue
     assert len(Qs) == len(histories)
     return Qs
 
