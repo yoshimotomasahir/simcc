@@ -362,34 +362,42 @@ def GetChargeHistories(MFP, initialQ, length, N=10000, random_state=None, histor
     length = length + offset_length  # シミュレーションの終点を設定
 
     # MFP のキャッシュ (辞書参照回数を削減)
-    mfp_cache = {key: MFP[key] for key in MFP}
+    mfp_cache = {int(key.split("->")[0])*10+(int(key.split("->")[1])-int(key.split("->")[0])) : MFP[key] for key in MFP}
     Qmax = max([int(key.split("->")[0]) for key in MFP])
     Qmin = min([int(key.split("->")[0]) for key in MFP])
-    mfp_cache[f"{Qmax}->{Qmax+1}"] = float("inf")
-    mfp_cache[f"{Qmin}->{Qmin-1}"] = float("inf")
+    mfp_cache[Qmax*10+1] = float("inf")
+    mfp_cache[Qmin*10-1] = float("inf")
+    lookup = np.vectorize(mfp_cache.get)
 
+    current_length = np.full(N, offset_length, dtype=np.float64)
+    Q = initialQs.copy()
+
+    current_length_list = [current_length.copy()]
+    Q_list = [Q]
+    dQ_list = []
+    while True:
+        lp = rs.exponential(lookup(Q * 10 + 1))
+        lm = rs.exponential(lookup(Q * 10 - 1))
+        current_length += np.where(lp < lm, lp, lm)
+        current_length_list.append(current_length.copy())
+        Q = np.where(lp < lm, Q + 1, Q - 1)
+        Q_list.append(Q.copy())
+        dQ_list.append(np.where(lp < lm, +1, -1).copy())
+        if np.all(current_length > length):
+            break
+
+    current_length_array = np.array(current_length_list).T
+    Q_array = np.array(Q_list).T
+    dQ_array = np.array(dQ_list).T
     for n in range(N):
-        Q = initialQs[n]
-        current_length = offset_length
-
-        history = [[Q, offset_length, "pre", zp]]  # 最初にだけzpを入れる
-        while True:
-            Qp, Qm = Q + 1, Q - 1
-
-            lp = rs.exponential(mfp_cache[f"{Q}->{Qp}"])
-            lm = rs.exponential(mfp_cache[f"{Q}->{Qm}"])
-
-            if current_length + lp > length and current_length + lm > length:
-                history.append([Q, length, "post"])
+        history = [[int(Q_array[n][0]),float(current_length_array[n][0]),"pre",zp]]
+        for Q, current_length, dQ in zip(Q_array[n][1:], current_length_array[n][1:],dQ_array[n]):
+            if current_length > length:
+                history.append([int(Q - dQ), float(length), "post"])
                 break
-            elif lp > lm:
-                current_length += lm
-                Q = Qm
-                history.append([Q, current_length, "-"])
             else:
-                current_length += lp
-                Q = Qp
-                history.append([Q, current_length, "+"])
+                history.append([int(Q), float(current_length), "+" if dQ > 0 else "-"])
+
         if ignored:
             # 計算した最後のQを距離0で追加する
             if len(histories[n]) > 0:
