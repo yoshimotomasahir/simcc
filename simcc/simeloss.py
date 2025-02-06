@@ -1,7 +1,7 @@
 import pycatima as catima
 import numpy as np
-from simcc import GetMaterial, GetMFP, GetChargeHistories, CalculateDeltaEWithChargeChanging, GetCharge
-
+from simcc import GetMaterial, GetMFP, GetChargeHistories, CalculateDeltaEWithChargeChanging, GetChargeDistribution
+import time
 
 def GetCAtimaCompound(zts, m_fractions):
     return [[0, z, m] for m, z in zip(m_fractions, zts)]
@@ -43,7 +43,7 @@ def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, his
     for ilayer in range(nlayer):
         layer.add(mat)
     res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=0, T=energy), layer, config)
-    print(energy, "->", res.total_result.Eout)
+    print(f"{energy:.3f} -> {res.total_result.Eout:.3f} MeV/u")
     assert res.total_result.Eout >= 50
 
     # 有効Zを無効にしてQは外から与える
@@ -58,17 +58,19 @@ def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, his
 
     # 分割層ごとに電荷履歴を計算
     rs = np.random.RandomState(1)
-    print("Calculating charge history", end=" ")
+    print("GetChargeHistories", end=" ")
+    start = time.time()
     for ilayer in range(nlayer):
         print(".", end="")
         histories = GetChargeHistories(MFPs[ilayer], Q, length / nlayer, random_state=rs, histories=histories)
-    print()
+    print(f"Elapsed time {time.time()-start:.1f} s")
 
     # 分割層ごとにdEdxを計算
     Eout = energy
 
     dEcc = np.zeros(N)
-    print("Calculating dE/dx", end=" ")
+    print("CalculateDeltaEWithChargeChanging", end=" ")
+    start = time.time()
     for ilayer in range(nlayer):
         print(".", end="")
         dedx_list = {}
@@ -86,18 +88,20 @@ def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, his
     dEcolRate = 1 + rs.normal(loc=0, scale=stragglingColRate, size=N)
     dEcol = np.mean(dEcc) * dEcolRate
     dEtotal = dEcc * dEcolRate
-    print(f" {energy:.2f} -> {energy-np.mean(dEcc):.2f} MeV/u")
+    print(f"Elapsed time {time.time()-start:.1f} s")
+    print(f"{energy:.3f} -> {energy-np.mean(dEcc):.3f} MeV/u")
 
     # 電荷分布をlog scaleで20層に分けて計算
-    print("Calculating charge distribution", end=" ")
+    print("GetChargeDistribution", end=" ")
+    start = time.time()
     length_log = np.array([0] + list(np.logspace(np.log10(length / 1000), np.log10(length), num=20)))
     charges = {"length": length_log}
     for l2 in length_log:
         print(".", end="")
-        charge_snap = np.array(GetCharge(histories, l1 + l2))
+        charge_snap = np.array(GetChargeDistribution(histories, l1 + l2))
         for Q in range(Z - 6, Z + 1):
             if Q not in charges:
                 charges[Q] = []
             charges[Q].append(np.sum(charge_snap == Q) / N)
-    print()
+    print(f"Elapsed time {time.time()-start:.1f} s")
     return dEtotal, dEcol, dEcc, charges, histories

@@ -424,7 +424,7 @@ def CheckLength(histories, l1, l2):
     return l1, l2
 
 
-def GetCharge(histories, length):
+def GetChargeDistribution(histories, length):
     """
     モンテカルロ法による電荷変化履歴からlengthの位置における電荷を得る
     長さを無視して電荷状態だけ計算する場合があるため、履歴の下流から探索する
@@ -515,7 +515,7 @@ def GetChargeChanging(histories, l1, l2):
     import math
 
     ChargeChangings = []
-    Qs = GetCharge(histories, l1)
+    Qs = GetChargeDistribution(histories, l1)
     for history, Charge in zip(histories, Qs):
         ChargeChanging = 0
         l = l1
