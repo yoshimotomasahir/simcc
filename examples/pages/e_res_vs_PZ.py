@@ -22,7 +22,7 @@ with col4:
 with col5:
     Z1 = st.number_input("Min Z", min_value=30, max_value=91, value=80, step=1)
 with col6:
-    Zstep = st.number_input("Z step", min_value=1, max_value=10, value=5, step=1)
+    Zstep = st.number_input("Number of Z step", min_value=1, max_value=10, value=5, step=1)
 
 st.write("Materials:")
 materials = []
