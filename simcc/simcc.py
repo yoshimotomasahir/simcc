@@ -80,8 +80,8 @@ def GetCS(zp, energy, zt, solid_gas="solid"):
 
     n_line = 1 + (zt - 1) * 191 + (int(energy) - 50) // 5
 
-    if str(energy) in [str(a) for a in range(50, 1001, 5)]:
-        return ParseCS(zp, energy, zt, solid_gas, n_line)
+    if len([a for a in range(50, 1001, 5) if np.isclose(a, energy)]) > 0:
+        return ParseCS(zp, int(energy), zt, solid_gas, n_line)
     else:
         e1 = ((int(energy)) // 5 + 0) * 5
         e2 = ((int(energy)) // 5 + 1) * 5
@@ -255,8 +255,7 @@ def GetMaterial(material, density_factor=1):
             zts, m_fractions = [13], [1]
             density = 2.702
         else:
-            if solid_gas not in ["solid", "gas"]:
-                solid_gas = "solid"
+            solid_gas = None
             zts, m_fractions = [int(material)], [1]
             density = 1
     return {"zts": zts, "m_fractions": m_fractions, "density": density * density_factor, "solid_gas": solid_gas}
@@ -269,8 +268,8 @@ def GetMFP(zp, energy, material, density_factor=1, solid_gas=None):
     density: g/cm3 もしmaterialを数値で与えた場合は1g/cm3になる
     """
     result = GetMaterial(material, density_factor)
-    zts, m_fractions, density, solid_gas = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
-    return GetMixedMFP(zp, energy, zts, m_fractions, solid_gas, density)
+    zts, m_fractions, density, solid_gas2 = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
+    return GetMixedMFP(zp, energy, zts, m_fractions, solid_gas if solid_gas2 is None else solid_gas2, density)
 
 
 def GetEqDistFromCS(cs):
