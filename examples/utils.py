@@ -1,0 +1,16 @@
+materialOptions = [
+    "Be",
+    "Al",
+    "Mylar",
+    "Pla",
+    "Kapton",
+    "P10",
+    "P10 620 Torr",
+    "Xe7",
+    "Xe7 620 Torr",
+    "CH4",
+    "CH4 620 Torr",
+    "Diamond",
+    "Gold",
+    "Tungsten",
+]

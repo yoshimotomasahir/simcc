@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pycatima as catima
 from simcc import *
+import sys
+sys.path.append("..")
+from utils import *
 
 st.write("Projectile:")
 col1, col2, col3 = st.columns(3)
@@ -19,7 +22,7 @@ with col4:
 with col5:
     energy1 = st.number_input("Max Energy [MeV/u]", min_value=100.0, max_value=1000.0, value=350.0, step=5.0)
 with col6:
-    energyBin = st.number_input("Number of bins", min_value=2, max_value=100, value=3, step=1)
+    energyBin = st.number_input("Number of bins", min_value=2, max_value=100, value=5, step=1)
 
 st.write("Materials:")
 materials = []
@@ -28,23 +31,8 @@ i = 0
 with col1:
     material = st.selectbox(
         f"Material",
-        options=[
-            "Be",
-            "Al",
-            "Mylar",
-            "Pla",
-            "Kapton",
-            "P10",
-            "P10 620 Torr",
-            "Xe7",
-            "Xe7 620 Torr",
-            "CH4",
-            "CH4 620 Torr",
-            "Diamond",
-            "Gold",
-            "Tungsten",
-        ],
-        index=1,
+        options=materialOptions,
+        index=5,
         key=f"material_{i}",
     )
 with col2:
