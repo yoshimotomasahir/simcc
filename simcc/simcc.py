@@ -599,7 +599,7 @@ def GetEquilibriumThickness(MFP, charge_state=0, threshold=1 / np.exp(6)):
 
     def condition(x, A, B_func, threshold):
         B_x = B_func(x)
-        return np.sum(np.abs(A - B_x)) - threshold * len(A)
+        return np.sum(np.abs(A - B_x)) / len(A) - threshold
 
     # 平衡状態の電荷分布
     EqDist = np.array(GetEqDist(MFP))
@@ -607,5 +607,9 @@ def GetEquilibriumThickness(MFP, charge_state=0, threshold=1 / np.exp(6)):
     P0 = np.zeros(len(EqDist))
     P0[charge_state] = 1.0  # 初期状態を設定
 
-    solution = scipy.optimize.fsolve(condition, 0, args=(A, lambda x: GetTransitionProbabilityImpl(MFP, x, P0), threshold))
+    # 初期状態で既に平衡状態の場合
+    if condition(0, EqDist, lambda x: GetTransitionProbabilityImpl(MFP, x, P0), threshold) < 0:
+        return 0
+
+    solution = scipy.optimize.fsolve(condition, 0.000001, args=(EqDist, lambda x: GetTransitionProbabilityImpl(MFP, x, P0), threshold))
     return solution[0]
