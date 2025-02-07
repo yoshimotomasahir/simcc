@@ -15,11 +15,14 @@ from plotly.subplots import make_subplots
 
 st.title("Equilibrium Thickness")
 
-st.write("The charge-state equilibrium is considered achieved when the difference from the equilibrium state probability is less than 1/e^6.")
+st.write(
+    "The charge-state equilibrium is considered achieved when the difference from the equilibrium state probability is less than 1/e^6. To reduce calculations costs, energy losses within the material are not taken into account."
+)
 
 graph_type = st.selectbox("Select the graph to display", ["Projectile Z Dependence", "Energy [MeV/u] Dependence", "Target Z Dependence"])
 
 solid_gas = "solid"
+
 
 def get_user_inputs(graph_type):
 
@@ -32,9 +35,9 @@ def get_user_inputs(graph_type):
             projectile_Z = st.slider("Projectile Z", 30, 92, 70)
     with col2:
         if graph_type == "Energy [MeV/u] Dependence":
-            energy = st.slider("Energy [MeV/u] Range", 50, 1000, (100, 350))
+            energy = st.slider("Energy [MeV/u] Range", 50, 1000, (100, 350), step=10)
         else:
-            energy = st.slider("Energy [MeV/u]", 50, 1000, 250)
+            energy = st.slider("Energy [MeV/u]", 50, 1000, 250, step=10)
     with col3:
         if graph_type == "Target Z Dependence":
             target_Z = st.slider("Target Z Range", 1, 92, (1, 92))
@@ -42,13 +45,14 @@ def get_user_inputs(graph_type):
             target_Z = st.slider("Target Z", 1, 92, 13)
     return projectile_Z, energy, target_Z
 
+
 projectile_Z, energy, target_Z = get_user_inputs(graph_type)
 
 if st.button("Execute Calculation"):
     st.write("### Calculation Results")
 
     if graph_type == "Energy [MeV/u] Dependence":
-        energies = np.arange(energy[0], energy[1], 10)
+        energies = np.arange(energy[0], energy[1] + 1, 10)
         thickness = {}
         for charge_state in range(3):
             thickness[charge_state] = [GetEquilibriumThickness(GetMFP(projectile_Z, ene, target_Z, solid_gas=solid_gas), charge_state) for ene in energies]
@@ -63,7 +67,7 @@ if st.button("Execute Calculation"):
 
         fig = make_subplots(subplot_titles=["Charge-state distribution"])
         for i, val in enumerate(np.array(EqDist).T):
-            fig.add_trace(go.Scatter(x=energies, y=val, mode='lines', name=f"Q = {projectile_Z-i}"))
+            fig.add_trace(go.Scatter(x=energies, y=val, mode="lines", name=f"Q = {projectile_Z-i}"))
         fig.update_layout(xaxis_title=" ".join(graph_type.split()[:-1]))
         st.plotly_chart(fig)
 
@@ -83,7 +87,7 @@ if st.button("Execute Calculation"):
 
         fig = make_subplots(subplot_titles=["Charge-state distribution"])
         for i, val in enumerate(np.array(EqDist).T):
-            fig.add_trace(go.Scatter(x=pzs, y=val, mode='lines', name=f"Z - Q = {i}"))
+            fig.add_trace(go.Scatter(x=pzs, y=val, mode="lines", name=f"Z - Q = {i}"))
         fig.update_layout(xaxis_title=" ".join(graph_type.split()[:-1]))
         st.plotly_chart(fig)
 
@@ -103,6 +107,6 @@ if st.button("Execute Calculation"):
 
         fig = make_subplots(subplot_titles=["Charge-state distribution"])
         for i, val in enumerate(np.array(EqDist).T):
-            fig.add_trace(go.Scatter(x=tzs, y=val, mode='lines', name=f"Z - Q = {i}"))
+            fig.add_trace(go.Scatter(x=tzs, y=val, mode="lines", name=f"Q = {projectile_Z-i}"))
         fig.update_layout(xaxis_title=" ".join(graph_type.split()[:-1]))
         st.plotly_chart(fig)
