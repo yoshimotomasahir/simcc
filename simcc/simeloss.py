@@ -1,6 +1,6 @@
 import pycatima as catima
 import numpy as np
-from simcc import GetMaterial, GetMFP, GetChargeHistories, CalculateDeltaEWithChargeChanging, GetChargeDistribution
+from simcc import GetMaterial, GetMFP, GetMCHistories, GetMCDeltaE, GetMCProb
 import time
 
 def GetCAtimaCompound(zts, m_fractions):
@@ -58,18 +58,18 @@ def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, his
 
     # 分割層ごとに電荷履歴を計算
     rs = np.random.RandomState(1)
-    print("GetChargeHistories", end=" ")
+    print("GetMCHistories", end=" ")
     start = time.time()
     for ilayer in range(nlayer):
         print(".", end="")
-        histories = GetChargeHistories(MFPs[ilayer], Q, length / nlayer, random_state=rs, histories=histories)
+        histories = GetMCHistories(MFPs[ilayer], Q, length / nlayer, random_state=rs, histories=histories)
     print(f"Elapsed time {time.time()-start:.1f} s")
 
     # 分割層ごとにdEdxを計算
     Eout = energy
 
     dEcc = np.zeros(N)
-    print("CalculateDeltaEWithChargeChanging", end=" ")
+    print("GetMCDeltaE", end=" ")
     start = time.time()
     for ilayer in range(nlayer):
         print(".", end="")
@@ -82,7 +82,7 @@ def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, his
             res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=Q, T=Eout), layer, config)
             dedx_list[Q] = (res.total_result.Ein - res.total_result.Eout) / (length / nlayer)
 
-        dE = CalculateDeltaEWithChargeChanging(histories, l1 + ilayer * length / nlayer, l1 + (ilayer + 1) * length / nlayer, dedx_list)
+        dE = GetMCDeltaE(histories, l1 + ilayer * length / nlayer, l1 + (ilayer + 1) * length / nlayer, dedx_list)
         Eout = Eout - np.mean(dE)
         dEcc += dE
     dEcolRate = 1 + rs.normal(loc=0, scale=stragglingColRate, size=N)
@@ -92,16 +92,16 @@ def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, his
     print(f"{energy:.3f} -> {energy-np.mean(dEcc):.3f} MeV/u")
 
     # 電荷分布をlog scaleで20層に分けて計算
-    print("GetChargeDistribution", end=" ")
+    print("GetMCProb", end=" ")
     start = time.time()
     length_log = np.array([0] + list(np.logspace(np.log10(length / 1000), np.log10(length), num=20)))
     charges = {"length": length_log}
     for l2 in length_log:
         print(".", end="")
-        charge_snap = np.array(GetChargeDistribution(histories, l1 + l2))
-        for Q in range(Z - 6, Z + 1):
-            if Q not in charges:
-                charges[Q] = []
-            charges[Q].append(np.sum(charge_snap == Q) / N)
+        charge_prob = np.array(GetMCProb(histories, l1 + l2))
+        for dQ in range(0, 7):
+            if Z - dQ not in charges:
+                charges[Z - dQ] = []
+            charges[Z - dQ].append(charge_prob[dQ])
     print(f"Elapsed time {time.time()-start:.1f} s")
     return dEtotal, dEcol, dEcc, charges, histories

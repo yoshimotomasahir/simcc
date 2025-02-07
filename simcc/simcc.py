@@ -273,7 +273,7 @@ def GetMFP(zp, energy, material, density_factor=1, solid_gas=None):
     return GetMixedMFP(zp, energy, zts, m_fractions, solid_gas if solid_gas2 is None else solid_gas2, density)
 
 
-def GetEqDistFromCS(cs):
+def GetAnalyticalEqProbFromCS(cs):
     """
     断面積の比から平衡状態における電荷分布を得る
     """
@@ -294,21 +294,21 @@ def GetEqDistFromCS(cs):
     return f
 
 
-def GetEqDist(MFP):
+def GetAnalyticalEqProb(MFP):
     """
     平均自由行程比から平衡状態における電荷分布を得る
     """
     cs = {}
     for key, value in MFP.items():
         cs[key] = 1 / value
-    return GetEqDistFromCS(cs)
+    return GetAnalyticalEqProbFromCS(cs)
 
 
-def GetQMean(MFP):
+def GetAnalyticalEqCharge(MFP):
     """
     平均自由行程比から平衡状態における平均電荷を得る
     """
-    dist = GetEqDist(MFP)
+    dist = GetAnalyticalEqProb(MFP)
     zp = int(list(MFP.keys())[0].split("-")[0])
     sum0 = 0.0
     sum1 = 0.0
@@ -318,11 +318,11 @@ def GetQMean(MFP):
     return sum1 / sum0
 
 
-def GetEqNcc(MFP, length):
+def GetAnalyticalEqNcc(MFP, length):
     """
     平衡状態における長さあたりの平均電荷変化回数を得る
     """
-    dist = GetEqDist(MFP)
+    dist = GetAnalyticalEqProb(MFP)
     zp = int(list(MFP.keys())[0].split("-")[0])
     ncc_sum = 0
     for i, f in enumerate(dist):
@@ -333,7 +333,7 @@ def GetEqNcc(MFP, length):
     return ncc_sum
 
 
-def GetChargeHistories(MFP, initialQ, length, N=10000, random_state=None, histories=None, ignored=False):
+def GetMCHistories(MFP, initialQ, length, N=10000, random_state=None, histories=None, ignored=False):
     """
     平均自由行程からモンテカルロ法による電荷変化履歴を得る
     lengthは、MFPと同じ単位を与える。MFPの単位がcmならlengthもcmで
@@ -424,7 +424,7 @@ def CheckLength(histories, l1, l2):
     return l1, l2
 
 
-def GetChargeDistribution(histories, length):
+def GetMCProbImpl(histories, length):
     """
     モンテカルロ法による電荷変化履歴からlengthの位置における電荷を得る
     長さを無視して電荷状態だけ計算する場合があるため、履歴の下流から探索する
@@ -446,7 +446,12 @@ def GetChargeDistribution(histories, length):
     return Qs
 
 
-def CalculateDeltaEWithChargeChanging(histories, l1, l2, dedx_list={}):
+def GetMCProb(histories, length):
+    Qs = GetMCProbImpl(histories, length)
+    return [np.sum(np.array(Qs) == Q) / len(histories) for Q in range(histories[0][0][3], histories[0][0][3] - 7, -1)]
+
+
+def GetMCDeltaE(histories, l1, l2, dedx_list={}):
     """
     電荷ごとのdE/dxから、電荷変化履歴におけるl1からl2までの実際のdEを得る
     dedx_list[zp],dedx_list[zp-1],...,dedx_list[zp-6] まで計算して与える
@@ -475,7 +480,7 @@ def CalculateDeltaEWithChargeChanging(histories, l1, l2, dedx_list={}):
     return dEs
 
 
-def GetChargeProbability(histories, l1, l2):
+def GetMCMeanProb(histories, l1, l2):
     """
     電荷変化履歴におけるl1からl2までの電荷状態の存在確率を得る
     """
@@ -507,7 +512,7 @@ def GetChargeProbability(histories, l1, l2):
     return Ps
 
 
-def GetChargeChanging(histories, l1, l2):
+def GetMCNcc(histories, l1, l2):
     """
     電荷変化履歴におけるl1からl2までの電荷状態の変化回数を得る
     """
@@ -515,7 +520,7 @@ def GetChargeChanging(histories, l1, l2):
     import math
 
     ChargeChangings = []
-    Qs = GetChargeDistribution(histories, l1)
+    Qs = GetMCProbImpl(histories, l1)
     for history, Charge in zip(histories, Qs):
         ChargeChanging = 0
         l = l1
@@ -536,7 +541,7 @@ def GetChargeChanging(histories, l1, l2):
     return ChargeChangings
 
 
-def GetMeanCharge(histories, l1, l2):
+def GetMCMeanCharge(histories, l1, l2):
     """
     電荷変化履歴におけるl1からl2までの平均電荷を得る
     """
@@ -544,10 +549,10 @@ def GetMeanCharge(histories, l1, l2):
     Z = histories[0][0][3]
     for dQ in range(7):
         dedx_list[Z - dQ] = (Z - dQ) / (l2 - l1)
-    return CalculateDeltaEWithChargeChanging(histories, l1, l2, dedx_list=dedx_list)
+    return GetMCDeltaE(histories, l1, l2, dedx_list=dedx_list)
 
 
-def GetTransitionProbabilityImpl(MFP, x, P0):
+def GetAnalyticalProbImpl(MFP, x, P0):
     """
     平均自由行程データ MFP から距離 x 進んだときの状態確率を計算する関数の実装部分
     """
@@ -578,7 +583,7 @@ def GetTransitionProbabilityImpl(MFP, x, P0):
     return P1
 
 
-def GetTransitionProbability(MFP, x, charge_state=0):
+def GetAnalyticalProb(MFP, x, charge_state=0):
     """
     平均自由行程データ MFP から距離 x 進んだときの状態確率を計算する関数
     """
@@ -589,10 +594,10 @@ def GetTransitionProbability(MFP, x, charge_state=0):
     P0 = np.zeros(n)
     P0[charge_state] = 1.0
 
-    return GetTransitionProbabilityImpl(MFP, x, P0).tolist()
+    return GetAnalyticalProbImpl(MFP, x, P0).tolist()
 
 
-def GetEquilibriumThickness(MFP, charge_state=0, threshold=1 / np.exp(6)):
+def GetAnalyticalEqThick(MFP, charge_state=0, threshold=1 / np.exp(6)):
     """
     平衡状態に到達するまでの厚さ x を求める
     """
@@ -602,14 +607,14 @@ def GetEquilibriumThickness(MFP, charge_state=0, threshold=1 / np.exp(6)):
         return np.sum(np.abs(A - B_x)) / len(A) - threshold
 
     # 平衡状態の電荷分布
-    EqDist = np.array(GetEqDist(MFP))
+    EqDist = np.array(GetAnalyticalEqProb(MFP))
 
     P0 = np.zeros(len(EqDist))
     P0[charge_state] = 1.0  # 初期状態を設定
 
     # 初期状態で既に平衡状態の場合
-    if condition(0, EqDist, lambda x: GetTransitionProbabilityImpl(MFP, x, P0), threshold) < 0:
+    if condition(0, EqDist, lambda x: GetAnalyticalProbImpl(MFP, x, P0), threshold) < 0:
         return 0
 
-    solution = scipy.optimize.fsolve(condition, 0.000001, args=(EqDist, lambda x: GetTransitionProbabilityImpl(MFP, x, P0), threshold))
+    solution = scipy.optimize.fsolve(condition, 0.000001, args=(EqDist, lambda x: GetAnalyticalProbImpl(MFP, x, P0), threshold))
     return solution[0]

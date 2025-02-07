@@ -25,7 +25,7 @@ if st.button("Execute Calculation"):
     for Zt in Zs:
         MFP = GetMFP(Z, energy, int(Zt), solid_gas="solid")
         MFPs.append(MFP)
-        EqDist.append(GetEqDist(MFP))
+        EqDist.append(GetAnalyticalEqProb(MFP))
 
     fig = go.Figure()
     

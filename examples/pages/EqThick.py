@@ -55,8 +55,8 @@ if st.button("Execute Calculation"):
         energies = np.arange(energy[0], energy[1] + 1, 10)
         thickness = {}
         for charge_state in range(3):
-            thickness[charge_state] = [GetEquilibriumThickness(GetMFP(projectile_Z, ene, target_Z, solid_gas=solid_gas), charge_state) for ene in energies]
-        EqDist = [GetEqDist(GetMFP(projectile_Z, ene, target_Z, solid_gas="solid")) for ene in energies]
+            thickness[charge_state] = [GetAnalyticalEqThick(GetMFP(projectile_Z, ene, target_Z, solid_gas=solid_gas), charge_state) for ene in energies]
+        EqDist = [GetAnalyticalEqProb(GetMFP(projectile_Z, ene, target_Z, solid_gas="solid")) for ene in energies]
 
         fig = make_subplots(subplot_titles=["Equilibrium Thickness [mg/cm2]"])
         for charge_state in range(3):
@@ -75,8 +75,8 @@ if st.button("Execute Calculation"):
         pzs = np.arange(projectile_Z[0], projectile_Z[1] + 1)
         thickness = {}
         for charge_state in range(3):
-            thickness[charge_state] = [GetEquilibriumThickness(GetMFP(pz, energy, target_Z, solid_gas=solid_gas), charge_state) for pz in pzs]
-        EqDist = [GetEqDist(GetMFP(pz, energy, target_Z, solid_gas="solid")) for pz in pzs]
+            thickness[charge_state] = [GetAnalyticalEqThick(GetMFP(pz, energy, target_Z, solid_gas=solid_gas), charge_state) for pz in pzs]
+        EqDist = [GetAnalyticalEqProb(GetMFP(pz, energy, target_Z, solid_gas="solid")) for pz in pzs]
 
         fig = make_subplots(subplot_titles=["Equilibrium Thickness [mg/cm2]"])
         for charge_state in range(3):
@@ -95,8 +95,8 @@ if st.button("Execute Calculation"):
         tzs = np.arange(target_Z[0], target_Z[1] + 1).tolist()
         thickness = {}
         for charge_state in range(3):
-            thickness[charge_state] = [GetEquilibriumThickness(GetMFP(projectile_Z, energy, tz, solid_gas=solid_gas), charge_state) for tz in tzs]
-        EqDist = [GetEqDist(GetMFP(projectile_Z, energy, tz, solid_gas="solid")) for tz in tzs]
+            thickness[charge_state] = [GetAnalyticalEqThick(GetMFP(projectile_Z, energy, tz, solid_gas=solid_gas), charge_state) for tz in tzs]
+        EqDist = [GetAnalyticalEqProb(GetMFP(projectile_Z, energy, tz, solid_gas="solid")) for tz in tzs]
 
         fig = make_subplots(subplot_titles=["Equilibrium Thickness [mg/cm2]"])
         for charge_state in range(3):
