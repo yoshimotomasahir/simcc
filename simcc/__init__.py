@@ -7,13 +7,14 @@ from .simcc import (
     GetAnalyticalEqProb,
     GetAnalyticalEqCharge,
     GetAnalyticalEqNcc,
+    GetAnalyticalEqThick,
+    GetAnalyticalProb,
     GetMCHistories,
+    GetMCProb,
     GetMCDeltaE,
     GetMCNcc,
     GetMCMeanCharge,
     GetMCMeanProb,
-    GetAnalyticalProb,
-    GetAnalyticalEqThick,
 )
 
 from .simeloss import GetDeltaE
@@ -27,12 +28,13 @@ __all__ = [
     "GetAnalyticalEqProb",
     "GetAnalyticalEqCharge",
     "GetAnalyticalEqNcc",
+    "GetAnalyticalEqThick",
+    "GetAnalyticalProb",
     "GetMCHistories",
+    "GetMCProb",
     "GetMCDeltaE",
     "GetMCNcc",
     "GetMCMeanCharge",
     "GetMCMeanProb",
     "GetDeltaE",
-    "GetAnalyticalProb",
-    "GetAnalyticalEqThick",
 ]
