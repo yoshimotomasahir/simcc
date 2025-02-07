@@ -17,5 +17,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.9",
-    install_requires=["numpy>=1.26.0", "pycatima>=1.96"],
+    install_requires=["numpy>=1.26.0", "pycatima>=1.96", "scipy>=1.11.4"],
 )

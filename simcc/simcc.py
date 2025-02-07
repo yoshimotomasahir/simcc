@@ -1,5 +1,6 @@
 import bisect
 import numpy as np
+import scipy
 
 periodic_table = ["H", "He",\
 "Li", "Be", "B", "C", "N", "O", "F", "Ne",\
@@ -544,3 +545,67 @@ def GetMeanCharge(histories, l1, l2):
     for dQ in range(7):
         dedx_list[Z - dQ] = (Z - dQ) / (l2 - l1)
     return CalculateDeltaEWithChargeChanging(histories, l1, l2, dedx_list=dedx_list)
+
+
+def GetTransitionProbabilityImpl(MFP, x, P0):
+    """
+    平均自由行程データ MFP から距離 x 進んだときの状態確率を計算する関数の実装部分
+    """
+    states = sorted(set(int(k.split("->")[0]) for k in MFP.keys()))
+    n = len(states)
+    Zmax = max(states)
+
+    # 平均自由行程行列
+    MFP_matrix = np.zeros((n, n))
+    for k, v in MFP.items():
+        i, j = Zmax - int(k.split("->")[0]), Zmax - int(k.split("->")[1])
+        MFP_matrix[j, i] = v
+
+    # 遷移行列 L の構築
+    T_matrix = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            if MFP_matrix[i, j] == 0:
+                continue
+            T_matrix[i, j] = -1 / MFP_matrix[i, j]
+    for i in range(n):
+        T_matrix[i, i] = -np.sum(T_matrix[:, i])
+
+    #  行列指数関数の計算
+    exp_Tx = scipy.linalg.expm(-T_matrix * x)
+    P1 = np.dot(exp_Tx, P0)
+
+    return P1
+
+
+def GetTransitionProbability(MFP, x, charge_state=0):
+    """
+    平均自由行程データ MFP から距離 x 進んだときの状態確率を計算する関数
+    """
+    states = sorted(set(int(k.split("->")[0]) for k in MFP.keys()))
+    n = len(states)
+
+    # 初期状態を設定
+    P0 = np.zeros(n)
+    P0[charge_state] = 1.0
+
+    return GetTransitionProbabilityImpl(MFP, x, P0).tolist()
+
+
+def GetEquilibriumThickness(MFP, charge_state=0, threshold=1 / np.exp(6)):
+    """
+    平衡状態に到達するまでの厚さ x を求める
+    """
+
+    def condition(x, A, B_func, threshold):
+        B_x = B_func(x)
+        return np.sum(np.abs(A - B_x)) - threshold * len(A)
+
+    # 平衡状態の電荷分布
+    EqDist = np.array(GetEqDist(MFP))
+
+    P0 = np.zeros(len(EqDist))
+    P0[charge_state] = 1.0  # 初期状態を設定
+
+    solution = scipy.optimize.fsolve(condition, 0, args=(A, lambda x: GetTransitionProbabilityImpl(MFP, x, P0), threshold))
+    return solution[0]

@@ -1,14 +1,40 @@
 from .simcc import (
-    z2symbol, symbol2z, z2weight, GetMaterial, GetMFP, GetEqDist,
-    GetQMean, GetEqNcc, GetChargeHistories, GetChargeDistribution, CalculateDeltaEWithChargeChanging,
-    GetChargeChanging, GetMeanCharge, GetChargeProbability
+    z2symbol,
+    symbol2z,
+    z2weight,
+    GetMaterial,
+    GetMFP,
+    GetEqDist,
+    GetQMean,
+    GetEqNcc,
+    GetChargeHistories,
+    GetChargeDistribution,
+    CalculateDeltaEWithChargeChanging,
+    GetChargeChanging,
+    GetMeanCharge,
+    GetChargeProbability,
+    GetTransitionProbability,
+    GetEquilibriumThickness,
 )
 
-from .simeloss import (GetDeltaE)
+from .simeloss import GetDeltaE
 
 __all__ = [
-    "z2symbol", "symbol2z", "z2weight", "GetMaterial", "GetMFP", "GetEqDist",
-    "GetQMean", "GetEqNcc", "GetChargeHistories", "GetChargeDistribution", "CalculateDeltaEWithChargeChanging",
-    "GetChargeChanging", "GetMeanCharge", "GetChargeProbability",
-    "GetDeltaE"
+    "z2symbol",
+    "symbol2z",
+    "z2weight",
+    "GetMaterial",
+    "GetMFP",
+    "GetEqDist",
+    "GetQMean",
+    "GetEqNcc",
+    "GetChargeHistories",
+    "GetChargeDistribution",
+    "CalculateDeltaEWithChargeChanging",
+    "GetChargeChanging",
+    "GetMeanCharge",
+    "GetChargeProbability",
+    "GetDeltaE",
+    "GetTransitionProbability",
+    "GetEquilibriumThickness",
 ]
