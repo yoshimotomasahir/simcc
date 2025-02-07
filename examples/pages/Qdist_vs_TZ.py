@@ -1,12 +1,13 @@
+import sys
+sys.path.append("..")
+from utils import *
+
+from simcc import *
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
-import pycatima as catima
-import sys
+import plotly.graph_objects as go
 
-sys.path.append("..")
-from simcc import *
-from utils import *
+st.title("Charge-state distribution")
 
 st.write("Projectile:")
 col2, col3 = st.columns(2)
@@ -26,24 +27,17 @@ if st.button("Execute Calculation"):
         MFPs.append(MFP)
         EqDist.append(GetEqDist(MFP))
 
-    fig, ax = plt.subplots(figsize=(5, 2))
+    fig = go.Figure()
+    
     for i, val in enumerate(np.array(EqDist).T):
-        ax.plot(Zs, val, label=f"Q={Z-i}")
-    ax.set_title("Equilibrium charge distribution")
-    ax.set_xlabel("Target atomic number Z")
-    ax.grid(alpha=0.4)
-    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-    st.pyplot(fig)
-
-    for label1, label2 in zip([f"{Z}->{Z-1}", f"{Z-1}->{Z-2}", f"{Z-2}->{Z-3}"], [f"{Z-1}->{Z}", f"{Z-2}->{Z-1}", f"{Z-3}->{Z-2}"]):
-        fig, ax = plt.subplots(figsize=(5, 2))
-        MFP_array = np.array([np.array(list(MFP.values())) for MFP in MFPs]).T
-        ax.plot(Zs, [MFP[label1] * 1000 for MFP in MFPs], label=label1)
-        ax.plot(Zs, [MFP[label2] * 1000 for MFP in MFPs], label=label2)
-        ax.set_title("Mean free path [mg/cm$^2$]")
-        ax.set_xlabel("Target atomic number Z")
-        ax.grid(alpha=0.4)
-        # ax.set_ylim(0, None)
-        ax.set_yscale("log")
-        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        st.pyplot(fig)
+        fig.add_trace(go.Scatter(x=Zs, y=val, mode='lines', name=f"Q={Z-i}"))
+    
+    fig.update_layout(
+        title="Equilibrium charge distribution",
+        xaxis_title="Target Z",
+        yaxis_title="Equilibrium Distribution",
+        template="plotly",
+        legend_title="Charge States"
+    )
+    
+    st.plotly_chart(fig)

@@ -7,6 +7,8 @@ import sys
 sys.path.append("..")
 from utils import *
 
+st.title("Energy resolution")
+
 st.write("Projectile:")
 col1, col2, col3 = st.columns(3)
 with col1:
