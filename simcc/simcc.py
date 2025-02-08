@@ -601,9 +601,13 @@ def GetAnalyticalProb(MFP, x, charge_state=0):
     states = sorted(set(int(k.split("->")[0]) for k in MFP.keys()))
     n = len(states)
 
-    # 初期状態を設定
     P0 = np.zeros(n)
-    P0[charge_state] = 1.0
+    try:
+        iter(charge_state)
+        for i, v in enumerate(charge_state):
+            P0[i] = v
+    except:
+        P0[charge_state] = 1.0  # 初期状態を設定
 
     return GetAnalyticalProbImpl(MFP, x, P0).tolist()
 
