@@ -202,15 +202,10 @@ def GetMaterial(material, density_factor=1):
         density = 1.420
         zts, m_fractions = [1, 6, 7, 8], [10, 22, 2, 5]  # C22H10O5N2 CATIMAと組成が異なる
 
-    elif material == "Pla" or material == "Plastics":
+    elif material == "Pla" or material == "Plastics" or material == "Plastic":
         solid_gas = "solid"
         density = 1.032
         zts, m_fractions = [1, 6], [10, 9]  # C9H10
-
-    elif material == "Diamond":
-        solid_gas = "solid"
-        density = 3.52
-        zts, m_fractions = [6], [1]  # C9H10
 
     elif material == "Lucite" or material == "Acrylic" or material == "PMMA":
         solid_gas = "solid"
@@ -239,22 +234,38 @@ def GetMaterial(material, density_factor=1):
             solid_gas = "gas"
             zts, m_fractions = [54], [1]
             density = 0.001 * densities["PureXe"]  # PDG 5.483 (20deg 1atm)
-        elif material == "Au" or material == "Gold":
-            solid_gas = "solid"
-            zts, m_fractions = [79], [1]
-            density = 19.32
         elif material == "Be" or material == "Beryllium":
             solid_gas = "solid"
             zts, m_fractions = [4], [1]
             density = 1.848
-        elif material == "W" or material == "Tungsten":
+        elif material == "Diamond":
             solid_gas = "solid"
-            zts, m_fractions = [74], [1]
-            density = 19.3
+            zts, m_fractions = [6], [1]
+            density = 3.52
         elif material == "Al" or material == "Aluminium" or material == "Aluminum":
             solid_gas = "solid"
             zts, m_fractions = [13], [1]
             density = 2.702
+        elif material == "Cu" or material == "Copper":
+            solid_gas = "solid"
+            zts, m_fractions = [29], [1]
+            density = 8.96
+        elif material == "Ta" or material == "Tantalum":
+            solid_gas = "solid"
+            zts, m_fractions = [73], [1]
+            density = 16.65
+        elif material == "W" or material == "Tungsten":
+            solid_gas = "solid"
+            zts, m_fractions = [74], [1]
+            density = 19.3
+        elif material == "Pt" or material == "Platinum":
+            solid_gas = "solid"
+            zts, m_fractions = [78], [1]
+            density = 21.45
+        elif material == "Au" or material == "Gold":
+            solid_gas = "solid"
+            zts, m_fractions = [79], [1]
+            density = 19.32
         else:
             solid_gas = None
             zts, m_fractions = [int(material)], [1]
