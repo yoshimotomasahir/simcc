@@ -49,7 +49,6 @@ def get_user_inputs(graph_type):
 projectile_Z, energy, target_Z = get_user_inputs(graph_type)
 
 if st.button("Execute Calculation"):
-    st.write("### Calculation Results")
 
     if graph_type == "Energy [MeV/u] Dependence":
         energies = np.arange(energy[0], energy[1] + 1, 10)
@@ -110,3 +109,5 @@ if st.button("Execute Calculation"):
             fig.add_trace(go.Scatter(x=tzs, y=val, mode="lines", name=f"Q = {projectile_Z-i}"))
         fig.update_layout(xaxis_title=" ".join(graph_type.split()[:-1]))
         st.plotly_chart(fig)
+
+    st.success("Calculation executed successfully!")

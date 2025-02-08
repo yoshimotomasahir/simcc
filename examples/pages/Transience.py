@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 
 st.title("Transient  state")
 
-st.write("## Projectile")
+st.write("**Projectile**")
 
 col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 with col1:
@@ -28,7 +28,7 @@ with col4:
     charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like"}
     charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), format_func=lambda x: charge_states[x])
 
-st.write("## Material")
+st.write("**Material**")
 
 # 各カテゴリの物質リスト（厚みの範囲を考慮）
 material_list = {
@@ -83,7 +83,6 @@ for i, item in enumerate(st.session_state.selected_materials):
         st.rerun()
 
 if st.button("Execute Calculation"):
-    st.write("### Calculation Results")
 
     n = len(st.session_state.selected_materials)
 
@@ -94,6 +93,7 @@ if st.button("Execute Calculation"):
     Probs = [P0]
     z_effectives = [projectile_Z, projectile_Z - 1, projectile_Z - 2, projectile_Z - 3, 1]
     energies = {}
+
     for z_effective in z_effectives:
         energies[z_effective] = [energy]
 
@@ -123,12 +123,14 @@ if st.button("Execute Calculation"):
                         Probs.append(P0)
                     energies[z_effective].append(energy1)
 
-    fig = make_subplots(subplot_titles=["Energy (MeV/u)"])
+    # グラフ化
+    fig = make_subplots(subplot_titles=["Energy (MeV/u) by CATIMA"])
     for z_effective in z_effectives:
         fig.add_trace(go.Scatter(x=lengths, y=energies[z_effective], mode="lines", name=f"Q=Zeff" if z_effective == 1 else f"Q={z_effective}"))
     for j in range(n + 1):
         fig.add_vline(x=j, line_dash="dash", line_color="gray", line_width=1)
-    fig.update_layout(xaxis_title="Materials: " + ", ".join(materials))
+    for i in range(n):
+        fig.add_annotation(x=i + 0.5, y=energy, text=materials[i], showarrow=False, font_size=16)
     st.plotly_chart(fig)
 
     fig = make_subplots(subplot_titles=["Charge-state probability"])
@@ -136,5 +138,8 @@ if st.button("Execute Calculation"):
         fig.add_trace(go.Scatter(x=lengths, y=np.array(Probs).T[j].T, mode="lines", name=f"Z-Q={j}"))
     for j in range(n + 1):
         fig.add_vline(x=j, line_dash="dash", line_color="gray", line_width=1)
-    fig.update_layout(xaxis_title="Materials: " + ", ".join(materials))
+    for i in range(n):
+        fig.add_annotation(x=i + 0.5, y=1, text=materials[i], showarrow=False, font_size=16)
     st.plotly_chart(fig)
+
+    st.success("Calculation executed successfully!")
