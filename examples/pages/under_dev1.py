@@ -89,7 +89,7 @@ if st.button("Execute Calculation"):
         if Q != "All":
             histories = None
 
-        dEtotal, dEcol, dEcc, charges, histories = GetDeltaE(
+        dEtotal, dEcol, dEcc, charges, histories = GetMCEloss(
             A,
             Z,
             Q,

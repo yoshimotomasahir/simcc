@@ -7,7 +7,7 @@ def GetCAtimaCompound(zts, m_fractions):
     return [[0, z, m] for m, z in zip(m_fractions, zts)]
 
 
-def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, histories=None):
+def GetMCEloss(A, Z, Q, energy, material, length, N=10000, random_state=None, histories=None):
 
     # 電荷状態を外から与えられるようにする
     config = catima.Config()
@@ -105,3 +105,27 @@ def GetDeltaE(A, Z, Q, energy, material, length, N=10000, random_state=None, his
             charges[Z - dQ].append(charge_prob[dQ])
     print(f"Elapsed time {time.time()-start:.1f} s")
     return dEtotal, dEcol, dEcc, charges, histories
+
+
+def GetAnalyticalEloss(A, Z, energy, material, length):
+
+    # 電荷状態を外から与えられるようにする
+    config = catima.Config()
+
+    # 有効Zを有効にする
+    config.z_effective = 1
+
+    # 物質情報を取得
+    result = GetMaterial(material)
+    zts, m_fractions, density, solid_gas = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
+    compound = GetCAtimaCompound(zts, m_fractions)
+
+    # 分割数を検討
+    mat = catima.Material(compound, density=density)
+    mat.thickness_cm(length)
+    layer = catima.Layers()
+    layer.add(mat)
+    res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=0, T=energy), layer, config)
+    Eloss = res.total_result.Ein - res.total_result.Eout
+
+    return Eloss, res.total_result.sigma_E

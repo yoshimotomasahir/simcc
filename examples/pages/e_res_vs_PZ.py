@@ -80,7 +80,7 @@ if st.button("Execute Calculation"):
             st.write(f"density: " + (f"{density:.2f} g/cm3" if density > 0.1 else f"{density*1000:.4f} mg/cm3"))
 
             histories = None
-            dEtotal, dEcol, dEcc, charges, histories = GetDeltaE(
+            dEtotal, dEcol, dEcc, charges, histories = GetMCEloss(
                 A,
                 Z,
                 Q,
@@ -90,7 +90,7 @@ if st.button("Execute Calculation"):
                 histories=histories,
             )
             histories = None
-            dEtotalm1, dEcolm1, dEccm1, chargesm1, historiesm1 = GetDeltaE(
+            dEtotalm1, dEcolm1, dEccm1, chargesm1, historiesm1 = GetMCEloss(
                 A,
                 Z - 1,
                 Q - 1,

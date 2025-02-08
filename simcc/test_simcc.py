@@ -1,4 +1,4 @@
-from simeloss import GetDeltaE
+from simeloss import GetMCEloss
 import numpy as np
 import time
 
@@ -8,7 +8,7 @@ A, Z, Q, energy, Target = 238, 92, 86, 250, "Au"
 thickness = 0.1
 
 start = time.time()
-dEtotal, dEcol, dEcc, charges, histories = GetDeltaE(A, Z, Q, energy, Target, thickness)
+dEtotal, dEcol, dEcc, charges, histories = GetMCEloss(A, Z, Q, energy, Target, thickness)
 print("Elapsed time:", time.time()-start)
 
 print(np.mean(dEtotal))

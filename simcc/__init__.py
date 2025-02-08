@@ -17,7 +17,7 @@ from .simcc import (
     GetMCMeanProb,
 )
 
-from .simeloss import GetDeltaE
+from .simeloss import GetMCEloss, GetAnalyticalEloss
 
 __all__ = [
     "z2symbol",
@@ -36,5 +36,6 @@ __all__ = [
     "GetMCNcc",
     "GetMCMeanCharge",
     "GetMCMeanProb",
-    "GetDeltaE",
+    "GetMCEloss",
+    "GetAnalyticalEloss",
 ]
