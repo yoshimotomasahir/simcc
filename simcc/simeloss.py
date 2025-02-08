@@ -107,13 +107,7 @@ def GetMCEloss(A, Z, Q, energy, material, length, N=10000, random_state=None, hi
     return dEtotal, dEcol, dEcc, charges, histories
 
 
-def GetAnalyticalEloss(A, Z, energy, material, length):
-
-    # 電荷状態を外から与えられるようにする
-    config = catima.Config()
-
-    # 有効Zを有効にする
-    config.z_effective = 1
+def GetAnalyticalEloss(A, Z, energy, material, length, z_effective = 1):
 
     # 物質情報を取得
     result = GetMaterial(material)
@@ -125,7 +119,15 @@ def GetAnalyticalEloss(A, Z, energy, material, length):
     mat.thickness_cm(length)
     layer = catima.Layers()
     layer.add(mat)
-    res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=0, T=energy), layer, config)
+
+    config = catima.Config()
+    if z_effective == 1:
+        config.z_effective = 1
+        res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=0, T=energy), layer, config)
+    else:
+        config.z_effective = 0
+        res = catima.calculate_layers(catima.Projectile(A=A, Z=Z, Q=z_effective, T=energy), layer, config)
+
     Eloss = res.total_result.Ein - res.total_result.Eout
 
     return Eloss, res.total_result.sigma_E
