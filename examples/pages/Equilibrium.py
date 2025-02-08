@@ -13,7 +13,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-st.title("Equilibrium Thickness")
+st.title("Equilibrium state")
 
 st.write(
     "The charge-state equilibrium is considered achieved when the difference from the equilibrium state probability is less than 1/e^6. To reduce calculations costs, energy losses within the material are not taken into account."
