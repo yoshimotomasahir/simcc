@@ -79,11 +79,12 @@ def GetCS(zp, energy, zt, solid_gas="solid"):
     assert zt >= 1 and zt <= 94
     assert solid_gas in ["solid", "gas"]
 
-    n_line = 1 + (zt - 1) * 191 + (int(energy) - 50) // 5
 
     if len([a for a in range(50, 1001, 5) if np.isclose(a, energy)]) > 0:
-        return ParseCS(zp, int(energy), zt, solid_gas, n_line)
+        n_line = 1 + (zt - 1) * 191 + (int(np.round(energy)) - 50) // 5
+        return ParseCS(zp, int(np.round(energy)), zt, solid_gas, n_line)
     else:
+        n_line = 1 + (zt - 1) * 191 + (int(energy) - 50) // 5
         e1 = ((int(energy)) // 5 + 0) * 5
         e2 = ((int(energy)) // 5 + 1) * 5
         cs1 = ParseCS(zp, e1, zt, solid_gas, n_line + 0)
