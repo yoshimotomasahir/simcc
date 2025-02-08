@@ -84,8 +84,6 @@ for i, item in enumerate(st.session_state.selected_materials):
 
 if st.button("Execute Calculation"):
 
-    n = len(st.session_state.selected_materials)
-
     P0 = np.zeros(7)
     P0[charge_state] = 1
     energy0 = energy
@@ -98,30 +96,46 @@ if st.button("Execute Calculation"):
         energies[z_effective] = [energy]
 
     materials = []
+    items = []
     for i, item in enumerate(st.session_state.selected_materials):
+        item = item.split("-")[0]
         if item in material_list["Gas detectors"]:
-            pass
+            if item == material_list["Gas detectors"][0]:
+                items.append("Kapton 0.125 mm")
+                items.append("P10 586 mm")
+                items.append("Mylar 0.1 mm")
+                items.append("Kapton 0.125 mm")
+            elif item == material_list["Gas detectors"][1]:
+                items.append("Kapton 0.125 mm")
+                items.append("Xe7 586 mm")
+                items.append("Mylar 0.1 mm")
+                items.append("Kapton 0.125 mm")
+            elif item == material_list["Gas detectors"][2]:
+                items.append("Mylar 0.045 mm")
         else:
-            material = item.split()[0]
-            materials.append(item.split("-")[0])
-            length = float(item.split()[1])
+            items.append(item)
+    n = len(items)
+    for i, item in enumerate(items):
+        material = item.split()[0]
+        materials.append(item.split("-")[0])
+        length = float(item.split()[1])
 
-            energy0 = {z_effective: energies[z_effective][-1] for z_effective in z_effectives}
+        energy0 = {z_effective: energies[z_effective][-1] for z_effective in z_effectives}
 
-            Eloss = GetAnalyticalEloss(int(projectile_Z * 2.5), projectile_Z, energy0[1], material, length * 0.1)[0]
-            length_log = np.array([0] + list(np.logspace(np.log10(length / 1000), np.log10(length), num=20 + int(Eloss))))
+        Eloss = GetAnalyticalEloss(int(projectile_Z * 2.5), projectile_Z, energy0[1], material, length * 0.1)[0]
+        length_log = np.array([0] + list(np.logspace(np.log10(length / 1000), np.log10(length), num=20 + int(Eloss))))
 
-            sub_energies = []
-            for l0, l1 in zip(length_log[:-1], length_log[1:]):
-                lengths.append(i + l1 / length)
+        sub_energies = []
+        for l0, l1 in zip(length_log[:-1], length_log[1:]):
+            lengths.append(i + l1 / length)
 
-                for z_effective in z_effectives:
-                    energy1 = energy0[z_effective] - GetAnalyticalEloss(int(projectile_Z * 2.5), projectile_Z, energy0[z_effective], material, l1 * 0.1, z_effective=z_effective)[0]
-                    if z_effective == 1:
-                        MFP = GetMFP(zp=projectile_Z, energy=energy1, material=material)
-                        P0 = GetAnalyticalProb(MFP, (l1 - l0) * 0.1, charge_state=P0)
-                        Probs.append(P0)
-                    energies[z_effective].append(energy1)
+            for z_effective in z_effectives:
+                energy1 = energy0[z_effective] - GetAnalyticalEloss(int(projectile_Z * 2.5), projectile_Z, energy0[z_effective], material, l1 * 0.1, z_effective=z_effective)[0]
+                if z_effective == 1:
+                    MFP = GetMFP(zp=projectile_Z, energy=energy1, material=material)
+                    P0 = GetAnalyticalProb(MFP, (l1 - l0) * 0.1, charge_state=P0)
+                    Probs.append(P0)
+                energies[z_effective].append(energy1)
 
     # グラフ化
     fig = make_subplots(subplot_titles=["Energy (MeV/u) by CATIMA"])
@@ -130,7 +144,7 @@ if st.button("Execute Calculation"):
     for j in range(n + 1):
         fig.add_vline(x=j, line_dash="dash", line_color="gray", line_width=1)
     for i in range(n):
-        fig.add_annotation(x=i + 0.5, y=energy, text=materials[i], showarrow=False, font_size=16)
+        fig.add_annotation(x=i + 0.5, y=energy, text=materials[i], showarrow=False)
     st.plotly_chart(fig)
 
     fig = make_subplots(subplot_titles=["Charge-state probability"])
@@ -139,7 +153,7 @@ if st.button("Execute Calculation"):
     for j in range(n + 1):
         fig.add_vline(x=j, line_dash="dash", line_color="gray", line_width=1)
     for i in range(n):
-        fig.add_annotation(x=i + 0.5, y=1, text=materials[i], showarrow=False, font_size=16)
+        fig.add_annotation(x=i + 0.5, y=1, text=materials[i], showarrow=False)
     st.plotly_chart(fig)
 
     st.success("Calculation executed successfully!")
