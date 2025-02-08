@@ -16,7 +16,7 @@ from plotly.subplots import make_subplots
 st.title("Equilibrium state")
 
 st.write(
-    "The charge-state equilibrium is considered achieved when the difference from the equilibrium state probability is less than 1/e^6. To reduce calculations costs, energy losses within the material are not taken into account."
+    "The charge-state equilibrium thickness is defined as the point where the probability difference from the equilibrium becomes less than $1/e^6$. To reduce calculation costs, **no energy losses** in the material are considered."
 )
 
 graph_type = st.selectbox("Select the graph to display", ["Projectile Z Dependence", "Energy [MeV/u] Dependence", "Target Z Dependence"])
