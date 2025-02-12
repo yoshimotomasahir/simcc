@@ -37,7 +37,7 @@ def get_user_inputs(graph_type):
         if graph_type == "Energy [MeV/u] Dependence":
             energy = st.slider("Energy [MeV/u] Range", 50, 1000, (100, 350), step=5)
         else:
-            energy = st.slider("Energy [MeV/u]", 50, 1000, 250, step=10)
+            energy = st.slider("Energy [MeV/u]", 50, 1000, 250, step=5)
     with col3:
         if graph_type == "Target Z Dependence":
             target_Z = st.slider("Target Z Range", 1, 92, (1, 92))
