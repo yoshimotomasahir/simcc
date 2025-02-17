@@ -23,9 +23,11 @@ with col1:
 with col2:
     energy = st.slider("Energy [MeV/u]", 50, 1000, 250, step=5)
 with col3:
-    Aoq = st.slider("A/q", 1.5, 3.5, 2.5, step=0.02)
+    AoZ = st.slider("A/Z", 1.5, 3.5, 2.5, step=0.01)
+    A = int(np.round(projectile_Z * AoZ))
+    st.write(f"A={A}")
 with col4:
-    charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like"}
+    charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
     charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), format_func=lambda x: charge_states[x])
 
 st.write("**Material**")
@@ -122,7 +124,7 @@ if st.button("Execute Calculation"):
 
         energy0 = {z_effective: energies[z_effective][-1] for z_effective in z_effectives}
 
-        Eloss = GetAnalyticalEloss(int(projectile_Z * 2.5), projectile_Z, energy0[1], material, length * 0.1)[0]
+        Eloss = GetAnalyticalEloss(A, projectile_Z, energy0[1], material, length * 0.1)[0]
         length_log = np.array([0] + list(np.logspace(np.log10(length / 1000), np.log10(length), num=20 + int(Eloss))))
 
         sub_energies = []
@@ -130,7 +132,7 @@ if st.button("Execute Calculation"):
             lengths.append(i + l1 / length)
 
             for z_effective in z_effectives:
-                energy1 = energy0[z_effective] - GetAnalyticalEloss(int(projectile_Z * 2.5), projectile_Z, energy0[z_effective], material, l1 * 0.1, z_effective=z_effective)[0]
+                energy1 = energy0[z_effective] - GetAnalyticalEloss(A, projectile_Z, energy0[z_effective], material, l1 * 0.1, z_effective=z_effective)[0]
                 if z_effective == 1:
                     MFP = GetMFP(zp=projectile_Z, energy=energy1, material=material)
                     P0 = GetAnalyticalProb(MFP, (l1 - l0) * 0.1, charge_state=P0)
@@ -148,7 +150,7 @@ if st.button("Execute Calculation"):
     st.plotly_chart(fig)
 
     fig = make_subplots(subplot_titles=["Charge-state probability"])
-    for j in range(4):
+    for j in range(7):
         fig.add_trace(go.Scatter(x=lengths, y=np.array(Probs).T[j].T, mode="lines", name=f"Z-Q={j}"))
     for j in range(n + 1):
         fig.add_vline(x=j, line_dash="dash", line_color="gray", line_width=1)
