@@ -23,7 +23,7 @@ with col1:
 with col2:
     energy = st.slider("Energy [MeV/u]", 50, 1000, 250, step=5)
 with col3:
-    Aoq = st.slider("A/q", 1.5, 3.5, 2.5, step=0.1)
+    Aoq = st.slider("A/q", 1.5, 3.5, 2.5, step=0.02)
 with col4:
     charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like"}
     charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), format_func=lambda x: charge_states[x])
