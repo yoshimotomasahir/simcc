@@ -103,9 +103,9 @@ def input_materials():
 
     # 選択された物質のリスト (セッションステートを使用)
     if "selected_materials" not in st.session_state:
-        st.session_state.selected_materials = []
+        st.session_state.selected_materials = ["P10 gas IC-0"]
     if "j" not in st.session_state:
-        st.session_state.j = 0
+        st.session_state.j = 1
 
     # 横に並べる
     col1, col2, col3, col4 = st.columns([3, 2, 2, 1])
