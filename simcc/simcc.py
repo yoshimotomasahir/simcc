@@ -243,6 +243,10 @@ def GetMaterial(material, density_factor=1):
             solid_gas = "solid"
             zts, m_fractions = [6], [1]
             density = 3.52
+        elif material == "Carbon":
+            solid_gas = "solid"
+            zts, m_fractions = [6], [1]
+            density = 1.8
         elif material == "Al" or material == "Aluminium" or material == "Aluminum":
             solid_gas = "solid"
             zts, m_fractions = [13], [1]
