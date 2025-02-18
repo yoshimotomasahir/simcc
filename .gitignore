@@ -20,3 +20,5 @@ MANIFEST
 
 .vs/
 __pycache__/
+
+test.ipynb
