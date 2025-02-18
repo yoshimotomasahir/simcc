@@ -82,6 +82,7 @@ if st.button("Execute Calculation"):
         ax.set_xlabel("Thickness [mm]")
         ax.set_xlim(0, None)
         ax.set_ylim(0, 1)
+        ax.grid(alpha=0.4)
         ax.set_title("Charge state fraction")
 
         ax = axes[2]
@@ -93,6 +94,7 @@ if st.button("Execute Calculation"):
         ax.set_xlabel("Energy loss [MeV/u]")
         ax.set_title("Energy loss distribution")
         ax.set_xlim(*histRange)
+        ax.grid(alpha=0.4)
         st.pyplot(fig)
 
         total_length += length
