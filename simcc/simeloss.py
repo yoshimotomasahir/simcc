@@ -9,6 +9,7 @@ def GetCAtimaCompound(zts, m_fractions):
 
 def GetMCEloss(A, Z, Q, energy, material, length, N=10000, random_state=None, histories=None):
 
+    assert random_state is not None
     # 電荷状態を外から与えられるようにする
     config = catima.Config()
 
@@ -57,12 +58,11 @@ def GetMCEloss(A, Z, Q, energy, material, length, N=10000, random_state=None, hi
         MFPs.append(GetMFP(Z, ene, material))
 
     # 分割層ごとに電荷履歴を計算
-    rs = np.random.RandomState(1)
     print("GetMCHistories", end=" ")
     start = time.time()
     for ilayer in range(nlayer):
         print(".", end="")
-        histories = GetMCHistories(MFPs[ilayer], Q, length / nlayer, random_state=rs, histories=histories)
+        histories = GetMCHistories(MFPs[ilayer], Q, length / nlayer, random_state=random_state, histories=histories, N=N)
     print(f"Elapsed time {time.time()-start:.1f} s")
 
     # 分割層ごとにdEdxを計算
@@ -85,7 +85,7 @@ def GetMCEloss(A, Z, Q, energy, material, length, N=10000, random_state=None, hi
         dE = GetMCDeltaE(histories, l1 + ilayer * length / nlayer, l1 + (ilayer + 1) * length / nlayer, dedx_list)
         Eout = Eout - np.mean(dE)
         dEcc += dE
-    dEcolRate = 1 + rs.normal(loc=0, scale=stragglingColRate, size=N)
+    dEcolRate = 1 + random_state.normal(loc=0, scale=stragglingColRate, size=N)
     dEcol = np.mean(dEcc) * dEcolRate
     dEtotal = dEcc * dEcolRate
     print(f"Elapsed time {time.time()-start:.1f} s")
