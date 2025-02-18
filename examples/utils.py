@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+from simcc import *
 
 materialOptions = [
     "Be",
@@ -23,7 +24,7 @@ material_list = {
     "Strippers": ["Ta", "Al", "W", "Pt", "Au"],
     "Gas detectors": ["P10 gas IC", "Xe gas IC", "PPAC"],
     "Gas": ["P10", "Xe7", "iC4H10"],
-    "Other detectors": ["Plastic", "Diamond"],
+    "Other detectors": ["Plastic", "Diamond", "Kapton", "Mylar"],
     "Degraders": ["Al", "Cu"],
     "Targets": ["Be", "W"],
 }
@@ -111,10 +112,17 @@ def input_materials():
 
     with col2:
         material = st.selectbox("Material", material_list[category])
+        if category == "Gas":
+            st.write(f'{GetMaterial(material)["density"]*1000:.4f} mg/cm3')
+        elif category != "Gas detectors":
+            st.write(f'{GetMaterial(material)["density"]} g/cm3')
 
     with col3:
         if category == "Gas detectors":
             thickness = st.number_input("Thickness (N/A)", disabled=True)  # 入力不可
+            expanded_materials = get_expanded_materials([material])
+            st.write(", ".join(expanded_materials))
+
         elif category == "Strippers":
             thickness = st.number_input("Thickness (µm)", min_value=0.0, max_value=1000.0, step=10.0, value=10.0)
         elif category == "Targets":
@@ -141,3 +149,24 @@ def input_materials():
             st.session_state.selected_materials.pop(i)
             st.rerun()
     return st.session_state.selected_materials
+
+def get_expanded_materials(materials):
+    expanded_materials = []
+    for i, material in enumerate(materials):
+        material = material.split("-")[0]
+        if material in material_list["Gas detectors"]:
+            if material == material_list["Gas detectors"][0]:
+                expanded_materials.append("Kapton 0.125 mm")
+                expanded_materials.append("P10 586 mm")
+                expanded_materials.append("Mylar 0.1 mm")
+                expanded_materials.append("Kapton 0.125 mm")
+            elif material == material_list["Gas detectors"][1]:
+                expanded_materials.append("Kapton 0.125 mm")
+                expanded_materials.append("Xe7 586 mm")
+                expanded_materials.append("Mylar 0.1 mm")
+                expanded_materials.append("Kapton 0.125 mm")
+            elif material == material_list["Gas detectors"][2]:
+                expanded_materials.append("Mylar 0.045 mm")
+        else:
+            expanded_materials.append(material)
+    return expanded_materials
