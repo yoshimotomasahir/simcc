@@ -98,7 +98,7 @@ def input_projectile():
 def input_materials():
     st.write("**Material**")
 
-    material_units = ["cm", "mm", "μm", "mg/cm2"]
+    material_units = ["mm", "μm", "cm", "mg/cm2"]
     material_unit = st.radio("Unit", material_units, key=f"material_unit", horizontal=True)
 
     # 選択された物質のリスト (セッションステートを使用)

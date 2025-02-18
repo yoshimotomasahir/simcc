@@ -90,7 +90,7 @@ if st.button("Execute Calculation"):
         for param, dE in zip(["dEcatima", "dEtotal (col+cc)"], [dEcatima, dEtotal]):
             label = f"{param}\nMean:{np.mean(dE):.3f}\nStdev:{np.std(dE):.3f} ({np.std(dE)/np.mean(dE):.2%})"
             ax.hist(dE, alpha=0.5, bins=50, range=histRange, label=label)
-        ax.legend(loc="upper left", bbox_to_anchor=(0.7, 1))
+        ax.legend(loc="upper left", bbox_to_anchor=(0.8, 1))
         ax.set_xlabel("Energy loss [MeV/u]")
         ax.set_title("Energy loss distribution")
         ax.set_xlim(*histRange)
