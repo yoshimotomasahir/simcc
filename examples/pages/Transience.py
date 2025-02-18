@@ -23,7 +23,6 @@ if st.button("Execute Calculation"):
 
     P0 = np.zeros(7)
     P0[charge_state] = 1
-    energy0 = energy
     lengths = [0]
     Probs = [P0]
     z_effectives = [projectile_Z, projectile_Z - 1, projectile_Z - 2, projectile_Z - 3, 1]
@@ -32,34 +31,16 @@ if st.button("Execute Calculation"):
     for z_effective in z_effectives:
         energies[z_effective] = [energy]
 
-    raw_materials = []
-    items = []
-    for i, item in enumerate(materials):
-        item = item.split("-")[0]
-        if item in material_list["Gas detectors"]:
-            if item == material_list["Gas detectors"][0]:
-                items.append("Kapton 0.125 mm")
-                items.append("P10 586 mm")
-                items.append("Mylar 0.1 mm")
-                items.append("Kapton 0.125 mm")
-            elif item == material_list["Gas detectors"][1]:
-                items.append("Kapton 0.125 mm")
-                items.append("Xe7 586 mm")
-                items.append("Mylar 0.1 mm")
-                items.append("Kapton 0.125 mm")
-            elif item == material_list["Gas detectors"][2]:
-                items.append("Mylar 0.045 mm")
-        else:
-            items.append(item)
-    n = len(items)
-    for i, item in enumerate(items):
-        material = item.split()[0]
-        raw_materials.append(item.split("-")[0])
-        length = float(item.split()[1])
+    expanded_materials = get_expanded_materials(materials)
+
+    n = len(expanded_materials)
+    for i, material in enumerate(expanded_materials):
+        material_name = material.split()[0]
+        length = float(material.split()[1])
 
         energy0 = {z_effective: energies[z_effective][-1] for z_effective in z_effectives}
 
-        Eloss = GetAnalyticalEloss(A, projectile_Z, energy0[1], material, length * 0.1)[0]
+        Eloss = GetAnalyticalEloss(A, projectile_Z, energy0[1], material_name, length * 0.1)[0]
         length_log = np.array([0] + list(np.logspace(np.log10(length / 1000), np.log10(length), num=20 + int(Eloss))))
 
         sub_energies = []
@@ -67,9 +48,9 @@ if st.button("Execute Calculation"):
             lengths.append(i + l1 / length)
 
             for z_effective in z_effectives:
-                energy1 = energy0[z_effective] - GetAnalyticalEloss(A, projectile_Z, energy0[z_effective], material, l1 * 0.1, z_effective=z_effective)[0]
+                energy1 = energy0[z_effective] - GetAnalyticalEloss(A, projectile_Z, energy0[z_effective], material_name, l1 * 0.1, z_effective=z_effective)[0]
                 if z_effective == 1:
-                    MFP = GetMFP(zp=projectile_Z, energy=energy1, material=material)
+                    MFP = GetMFP(zp=projectile_Z, energy=energy1, material=material_name)
                     P0 = GetAnalyticalProb(MFP, (l1 - l0) * 0.1, charge_state=P0)
                     Probs.append(P0)
                 energies[z_effective].append(energy1)
@@ -81,7 +62,7 @@ if st.button("Execute Calculation"):
     for j in range(n + 1):
         fig.add_vline(x=j, line_dash="dash", line_color="gray", line_width=1)
     for i in range(n):
-        fig.add_annotation(x=i + 0.5, y=energy, text=raw_materials[i], showarrow=False)
+        fig.add_annotation(x=i + 0.5, y=energy, text=expanded_materials[i].split("-")[0], showarrow=False)
     st.plotly_chart(fig)
 
     fig = make_subplots(subplot_titles=["Charge-state probability"])
@@ -90,7 +71,7 @@ if st.button("Execute Calculation"):
     for j in range(n + 1):
         fig.add_vline(x=j, line_dash="dash", line_color="gray", line_width=1)
     for i in range(n):
-        fig.add_annotation(x=i + 0.5, y=1, text=raw_materials[i], showarrow=False)
+        fig.add_annotation(x=i + 0.5, y=1, text=expanded_materials[i].split("-")[0], showarrow=False)
     st.plotly_chart(fig)
 
     st.success("Calculation executed successfully!")
