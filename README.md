@@ -6,11 +6,13 @@ SimCC is a Python package for simulating charge-state changes in materials.
 Required:
 - pycatima
 - numpy
+- scipy
 
 Optional:
 - jupyter
 - streamlit
 - matplotlib
+- plotly
 
 ## Features
 - Calculate charge-changing cross-sections and mean free paths
@@ -20,15 +22,29 @@ Optional:
 ## Getting Started
 Follow these steps to install SimCC:
 
-1. Clone the repository:
+1. Create and activate a virtual environment:
     ```sh
+    sudo apt update
+    sudo apt install python3-venv python3-dev
+    cd ~/venv
+    python3 -m venv venv
+    source venv/bin/activate  # On macOS/Linux
+    venv\Scripts\activate  # On Windows
+    ```
+2. Install `build-essential` and `cmake`:
+    ```sh
+    sudo apt install build-essential cmake
+    ```
+3. Clone the repository:
+    ```sh
+    cd ~
     git clone https://ribfrepo.riken.jp/yoshimoto/simcc.git
     ```
-2. Navigate to the project directory:
+4. Navigate to the project directory:
     ```sh
     cd simcc
     ```
-3. Install using pip:
+5. Install using pip:
     ```sh
     pip install .
     ```
@@ -39,6 +55,5 @@ Example files for Jupyter and Streamlit are available in the examples directory.
 To run Streamlit, execute the following commands:
 
 ```sh
-pip install streamlit matplotlib
 streamlit run ./examples/app.py
 ```
