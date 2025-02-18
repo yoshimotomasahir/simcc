@@ -115,11 +115,13 @@ def input_materials():
 
     with col2:
         material = st.selectbox("Material", material_list[category])
-        density = GetMaterial(material)["density"]
-        if category == "Gas":
-            st.write(f"{density*1000:.6g} mg/cm3")
-        elif category != "Gas detectors":
-            st.write(f"{density:.6g} g/cm3")
+        if category != "Gas detectors":
+            density = GetMaterial(material)["density"]
+            if category == "Gas":
+                st.write(f"{density*1000:.6g} mg/cm3")
+            elif category != "Gas detectors":
+                st.write(f"{density:.6g} g/cm3")
+
 
     with col3:
         if category == "Gas detectors":
@@ -148,7 +150,8 @@ def input_materials():
         if st.button("Add"):
             if category == "Gas detectors":
                 item = f"{material}"
-            item = f"{material} {st.session_state.thickness:.6g} mm"
+            else:
+                item = f"{material} {st.session_state.thickness:.6g} mm"
             st.session_state.selected_materials.append(f"{item}-{st.session_state.j}")
             st.session_state.j += 1
 
