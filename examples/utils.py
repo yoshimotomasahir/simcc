@@ -26,7 +26,7 @@ material_list = {
     "Gas": ["P10", "Xe7", "iC4H10"],
     "Other detectors": ["Plastic", "Diamond", "Kapton", "Mylar"],
     "Degraders": ["Al", "Cu"],
-    "Targets": ["Be", "W"],
+    "Targets": ["Be", "W", "Carbon"],
 }
 
 clight = 299.792458  # mm/ns
@@ -90,13 +90,16 @@ def input_projectile():
     with col4:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
         charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), format_func=lambda x: charge_states[x])
-        st.write(f"Brho={energy2brho(energy, A, projectile_Z-charge_state):.5f} Tm")
+        st.write(f"Brho={energy2brho(energy, A, projectile_Z-charge_state):.6f} Tm")
 
     return projectile_Z, energy, A, charge_state
 
 
 def input_materials():
     st.write("**Material**")
+
+    material_units = ["cm", "mm", "μm", "mg/cm2"]
+    material_unit = st.radio("Unit", material_units, key=f"material_unit", horizontal=True)
 
     # 選択された物質のリスト (セッションステートを使用)
     if "selected_materials" not in st.session_state:
@@ -112,34 +115,40 @@ def input_materials():
 
     with col2:
         material = st.selectbox("Material", material_list[category])
+        density = GetMaterial(material)["density"]
         if category == "Gas":
-            st.write(f'{GetMaterial(material)["density"]*1000:.4f} mg/cm3')
+            st.write(f"{density*1000:.6g} mg/cm3")
         elif category != "Gas detectors":
-            st.write(f'{GetMaterial(material)["density"]} g/cm3')
+            st.write(f"{density:.6g} g/cm3")
 
     with col3:
         if category == "Gas detectors":
             thickness = st.number_input("Thickness (N/A)", disabled=True)  # 入力不可
             expanded_materials = get_expanded_materials([material])
             st.write(", ".join(expanded_materials))
-
-        elif category == "Strippers":
-            thickness = st.number_input("Thickness (µm)", min_value=0.0, max_value=1000.0, step=10.0, value=10.0)
-        elif category == "Targets":
-            thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=20.0, step=1.0, value=2.0)
-        elif category == "Degraders":
-            thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=20.0, step=0.1, value=2.0)
-        elif category == "Gas":
-            thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=5000.0, step=0.1, value=600.0)
-        elif category == "Other detectors":
-            thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=10.0, step=0.1, value=0.1)
+        elif material_unit == "mg/cm2":
+            thickness_mgcm3 = st.number_input("Thickness (mg/cm2)", min_value=0.0, max_value=5000.0, step=1.0, value=100.0)
+            st.session_state.thickness = thickness_mgcm3 / density / 1000 / 0.1
+        else:
+            if material_unit == "μm":
+                thickness = st.number_input("Thickness (µm)", min_value=0.0, max_value=1000.0, step=10.0, value=10.0)
+                st.session_state.thickness = thickness * 0.001
+            elif material_unit == "mm":
+                thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=500.0, step=1.0, value=2.0)
+                st.session_state.thickness = thickness * 1
+            elif material_unit == "cm":
+                thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=500.0, step=1.0, value=60.0)
+                st.session_state.thickness = thickness * 10
+            if category == "Gas detectors":
+                st.write(f"{density*1000 * st.session_state.thickness*0.1:.6g} g/cm3")
+            else:
+                st.write(f"{density * st.session_state.thickness*0.1:.6g} g/cm3")
 
     with col4:
         if st.button("Add"):
             if category == "Gas detectors":
                 item = f"{material}"
-            else:
-                item = f"{material} {thickness*0.001 if category =='Strippers' else thickness} mm"
+            item = f"{material} {st.session_state.thickness:.6g} mm"
             st.session_state.selected_materials.append(f"{item}-{st.session_state.j}")
             st.session_state.j += 1
 
@@ -149,6 +158,7 @@ def input_materials():
             st.session_state.selected_materials.pop(i)
             st.rerun()
     return st.session_state.selected_materials
+
 
 def get_expanded_materials(materials):
     expanded_materials = []
