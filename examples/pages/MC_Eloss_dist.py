@@ -97,6 +97,8 @@ if st.button("Execute Calculation"):
         ax.grid(alpha=0.4)
         st.pyplot(fig)
 
+        st.write(f"Eout(simcc): {Ein - np.mean(dEtotal):.3f} MeV/u, Eloss(simcc): {np.mean(dEtotal):.3f} MeV/u, Eloss(CATIMA): {eloss:.3f} MeV/u ({(eloss)/(np.mean(dEtotal))-1:+.1%})")
+
         total_length += length
         Ein = Ein - np.mean(dEtotal)
 
