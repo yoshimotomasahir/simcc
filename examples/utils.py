@@ -77,16 +77,26 @@ def energy2brho(energy, A, Q):
 
 def input_projectile():
     st.write("**Projectile**")
+    use_number_input = st.toggle("Number input")
 
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     with col1:
-        projectile_Z = st.slider("Projectile Z", 30, 92, 70)
+        if use_number_input:
+            projectile_Z = st.number_input("Z", min_value=30, max_value=94, step=1, value=70)
+        else:
+            projectile_Z = st.slider("Z", 30, 94, 70)
     with col2:
-        energy = st.slider("Energy [MeV/u]", 50, 1000, 250, step=5)
+        if use_number_input:
+            energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=250.0)
+        else:
+            energy = st.slider("Energy (MeV/u)", 50, 1000, 250, step=5)
     with col3:
-        AoZ = st.slider("A/Z", 1.5, 3.5, 2.5, step=0.01)
-        A = int(np.round(projectile_Z * AoZ))
-        st.write(f"A={A}")
+        if use_number_input:
+            A = st.number_input("A", min_value=50, max_value=300, step=1, value=175)
+        else:
+            AoZ = st.slider("A/Z", 1.5, 3.5, 2.5, step=0.01)
+            A = int(np.round(projectile_Z * AoZ))
+            st.write(f"A={A}")
     with col4:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
         charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), format_func=lambda x: charge_states[x])
