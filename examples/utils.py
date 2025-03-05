@@ -85,6 +85,7 @@ def input_projectile():
             projectile_Z = st.number_input("Z", min_value=30, max_value=94, step=1, value=70)
         else:
             projectile_Z = st.slider("Z", 30, 94, 70)
+        st.write(f"Element: {z2symbol[projectile_Z]}")
     with col2:
         if use_number_input:
             energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=250.0)

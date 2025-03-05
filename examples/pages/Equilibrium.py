@@ -30,9 +30,11 @@ def get_user_inputs(graph_type):
 
     with col1:
         if graph_type == "Projectile Z Dependence":
-            projectile_Z = st.slider("Projectile Z Range", 30, 92, (30, 92))
+            projectile_Z = st.slider("Projectile Z Range", 30, 94, (30, 92))
+            st.write(f"Element: {z2symbol[projectile_Z[0]]} - {z2symbol[projectile_Z[1]]}")
         else:
             projectile_Z = st.slider("Projectile Z", 30, 92, 70)
+            st.write(f"Element: {z2symbol[projectile_Z]}")
     with col2:
         if graph_type == "Energy [MeV/u] Dependence":
             energy = st.slider("Energy [MeV/u] Range", 50, 1000, (100, 350), step=5)
@@ -41,8 +43,10 @@ def get_user_inputs(graph_type):
     with col3:
         if graph_type == "Target Z Dependence":
             target_Z = st.slider("Target Z Range", 1, 92, (1, 92))
+            st.write(f"Element: {z2symbol[target_Z[0]]} - {z2symbol[target_Z[1]]}")
         else:
             target_Z = st.slider("Target Z", 1, 92, 13)
+            st.write(f"Element: {z2symbol[target_Z]}")
     return projectile_Z, energy, target_Z
 
 
