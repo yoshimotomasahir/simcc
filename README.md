@@ -38,7 +38,7 @@ Follow these steps to install SimCC:
 3. Clone the repository:
     ```sh
     cd ~
-    git clone https://ribfrepo.riken.jp/yoshimoto/simcc.git
+    git clone https://github.com/yoshimotomasahir/simcc.git
     ```
 4. Navigate to the project directory:
     ```sh
