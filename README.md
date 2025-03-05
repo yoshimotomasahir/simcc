@@ -1,6 +1,8 @@
 # SimCC
 SimCC is a Python package for simulating charge-state changes in materials.
 
+You can try this package at https://simcc-web.streamlit.app/ .
+
 ## Dependencies
 
 Required:
