@@ -57,3 +57,9 @@ To run Streamlit, execute the following commands:
 ```sh
 streamlit run ./examples/app.py
 ```
+
+## Notes
+
+Note that this simulation does not consider transitions of two-electrons capture and two-electrons removal.
+
+Note that the cross sections does not match perfectly with the [GLOBAL](https://web-docs.gsi.de/~weick/charge_states/) ones, see the [cross section data](/simcc/ChargeStates).
