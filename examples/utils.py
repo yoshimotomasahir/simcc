@@ -22,11 +22,11 @@ materialOptions = [
 # 各カテゴリの物質リスト（厚みの範囲を考慮）
 material_list = {
     "Gas detectors": ["P10 gas IC", "Xe gas IC", "PPAC"],
-    "Gas": ["P10", "Xe7", "iC4H10", "CH4"],
+    "Gas": ["P10", "Xe7", "iC4H10", "CH4", "GasHe", "GasNe", "GasAr", "GasKr", "GasXe"],
     "Strippers": ["Al", "Ta", "W", "Pt", "Au"],
-    "Other detectors": ["Plastic", "Diamond", "Kapton", "Mylar"],
-    "Degraders": ["Al", "Cu"],
+    "Degraders": ["Al", "Cu", "Acrylic"],
     "Targets": ["Be", "W", "Carbon"],
+    "Others": ["Plastic", "Diamond", "Kapton", "Mylar"],
     "Single substance": [f"Z={Z}" for Z in range(1, 93)],
 }
 
@@ -131,6 +131,8 @@ def input_materials():
             density = GetMaterial(material)["density"]
             if category == "Gas":
                 st.write(f"{density*1000:.6g} mg/cm3")
+            elif category == "Single substance":
+                st.write(f"Element: {z2symbol[int(material.replace("Z=", ""))]} ({density:.6g} g/cm3)")
             elif category != "Gas detectors":
                 st.write(f"{density:.6g} g/cm3")
 
@@ -147,10 +149,10 @@ def input_materials():
                 thickness = st.number_input("Thickness (µm)", min_value=0.0, max_value=1000.0, step=10.0, value=10.0)
                 st.session_state.thickness = thickness * 0.001
             elif material_unit == "mm":
-                thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=500.0, step=1.0, value=2.0)
+                thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=500.0, step=1.0, value=1.0)
                 st.session_state.thickness = thickness * 1
             elif material_unit == "cm":
-                thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=500.0, step=1.0, value=60.0)
+                thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=500.0, step=1.0, value=1.0)
                 st.session_state.thickness = thickness * 10
             if category == "Gas":
                 st.write(f"{density*1000 * st.session_state.thickness*0.1:.6g} mg/cm3")
