@@ -22,7 +22,7 @@ materialOptions = [
 # 各カテゴリの物質リスト（厚みの範囲を考慮）
 material_list = {
     "Gas detectors": ["P10 gas IC", "Xe gas IC", "PPAC"],
-    "Gas": ["P10", "Xe7", "iC4H10"],
+    "Gas": ["P10", "Xe7", "iC4H10", "CH4"],
     "Strippers": ["Al", "Ta", "W", "Pt", "Au"],
     "Other detectors": ["Plastic", "Diamond", "Kapton", "Mylar"],
     "Degraders": ["Al", "Cu"],
