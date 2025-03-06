@@ -15,6 +15,7 @@ from plotly.subplots import make_subplots
 import matplotlib.collections as mc
 import matplotlib.cm as cm
 
+st.set_page_config(page_title="Energy loss distribution -SimCC-", page_icon="🌠")
 st.title("MC for energy loss distribution")
 
 projectile_Z, energy, A, charge_state = input_projectile()

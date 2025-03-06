@@ -13,6 +13,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+st.set_page_config(page_title="Equilibrium state -SimCC-", page_icon="🌠")
 st.title("Equilibrium state")
 
 st.write(
