@@ -215,23 +215,23 @@ def GetMaterial(material, density_factor=1):
 
     else:
         ZTarget = None
-        if material == "PureHe":
+        if material == "GasHe":
             solid_gas = "gas"
             zts, m_fractions = [2], [1]
             density = 0.001 * 0.179
-        elif material == "PureNe":
+        elif material == "GasNe":
             solid_gas = "gas"
             zts, m_fractions = [10], [1]
             density = 0.001 * 0.839
-        elif material == "PureAr":
+        elif material == "GasAr":
             solid_gas = "gas"
             zts, m_fractions = [18], [1]
             density = 0.001 * densities["PureAr"]  # PDG 1.662 (20deg 1atm)
-        elif material == "PureKr":
+        elif material == "GasKr":
             solid_gas = "gas"
             zts, m_fractions = [36], [1]
             density = 0.001 * 3.4
-        elif material == "PureXe" or material == "(CH4)0Xe10":
+        elif material == "GasXe" or material == "(CH4)0Xe10":
             solid_gas = "gas"
             zts, m_fractions = [54], [1]
             density = 0.001 * densities["PureXe"]  # PDG 5.483 (20deg 1atm)
