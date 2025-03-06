@@ -27,6 +27,7 @@ material_list = {
     "Other detectors": ["Plastic", "Diamond", "Kapton", "Mylar"],
     "Degraders": ["Al", "Cu"],
     "Targets": ["Be", "W", "Carbon"],
+    "Single substance": [f"Z={Z}" for Z in range(1, 93)],
 }
 
 clight = 299.792458  # mm/ns
@@ -133,7 +134,6 @@ def input_materials():
             elif category != "Gas detectors":
                 st.write(f"{density:.6g} g/cm3")
 
-
     with col3:
         if category == "Gas detectors":
             thickness = st.number_input("Thickness (N/A)", disabled=True)  # 入力不可
@@ -161,6 +161,8 @@ def input_materials():
         if st.button("Add"):
             if category == "Gas detectors":
                 item = f"{material}"
+            elif category == "Single substance":
+                item = f"{material} {density * st.session_state.thickness * 0.1:.6g} g/cm2"
             else:
                 item = f"{material} {st.session_state.thickness:.6g} mm"
             st.session_state.selected_materials.append(f"{item}-{st.session_state.j}")
@@ -194,3 +196,12 @@ def get_expanded_materials(materials):
         else:
             expanded_materials.append(material)
     return expanded_materials
+
+
+def get_material_name_length(material):
+    material_name = material.split()[0]
+    if material.split()[2] == "mm":
+        length = float(material.split()[1])
+    elif material.split()[2] == "g/cm2":
+        length = float(material.split()[1])*10
+    return material_name, length

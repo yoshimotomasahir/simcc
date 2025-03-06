@@ -35,8 +35,7 @@ if st.button("Execute Calculation"):
 
     n = len(expanded_materials)
     for i, material in enumerate(expanded_materials):
-        material_name = material.split()[0]
-        length = float(material.split()[1])
+        material_name, length = get_material_name_length(material)
 
         energy0 = {z_effective: energies[z_effective][-1] for z_effective in z_effectives}
 

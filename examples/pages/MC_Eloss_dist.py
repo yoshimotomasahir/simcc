@@ -30,8 +30,7 @@ if st.button("Execute Calculation"):
     rs = np.random.RandomState(1)
     rs_mc = np.random.RandomState(1)
     for i, material in enumerate(expanded_materials):
-        material_name = material.split()[0]
-        length = float(material.split()[1])
+        material_name, length = get_material_name_length(material)
 
         dEtotal, dEcol, dEcc, charges, histories = GetMCEloss(
             A,
