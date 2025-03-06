@@ -152,8 +152,8 @@ def input_materials():
             elif material_unit == "cm":
                 thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=500.0, step=1.0, value=60.0)
                 st.session_state.thickness = thickness * 10
-            if category == "Gas detectors":
-                st.write(f"{density*1000 * st.session_state.thickness*0.1:.6g} g/cm3")
+            if category == "Gas":
+                st.write(f"{density*1000 * st.session_state.thickness*0.1:.6g} mg/cm3")
             else:
                 st.write(f"{density * st.session_state.thickness*0.1:.6g} g/cm3")
 
