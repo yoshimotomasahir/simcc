@@ -226,7 +226,7 @@ def GetMaterial(material, density_factor=1):
         elif material == "GasAr":
             solid_gas = "gas"
             zts, m_fractions = [18], [1]
-            density = 0.001 * densities["PureAr"]  # PDG 1.662 (20deg 1atm)
+            density = 0.001 * densities["GasAr"]  # PDG 1.662 (20deg 1atm)
         elif material == "GasKr":
             solid_gas = "gas"
             zts, m_fractions = [36], [1]
@@ -234,7 +234,7 @@ def GetMaterial(material, density_factor=1):
         elif material == "GasXe" or material == "(CH4)0Xe10":
             solid_gas = "gas"
             zts, m_fractions = [54], [1]
-            density = 0.001 * densities["PureXe"]  # PDG 5.483 (20deg 1atm)
+            density = 0.001 * densities["GasXe"]  # PDG 5.483 (20deg 1atm)
         elif material == "Be" or material == "Beryllium":
             solid_gas = "solid"
             zts, m_fractions = [4], [1]
