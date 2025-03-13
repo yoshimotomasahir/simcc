@@ -45,7 +45,8 @@ if st.button("Execute Calculation"):
         )
 
         eloss, eloss_sigma = GetAnalyticalEloss(A, projectile_Z, Ein, material_name, length*0.1)
-        dEcatima = rs.normal(loc=eloss, scale=eloss_sigma, size=10000)
+        N=10000
+        dEcatima = rs.normal(loc=eloss, scale=eloss_sigma, size=N)
 
         fig, axes = plt.subplots(ncols=3, figsize=(12, 4))
 
@@ -102,4 +103,4 @@ if st.button("Execute Calculation"):
         total_length += length
         Ein = Ein - np.mean(dEtotal)
 
-    st.success("Calculation executed successfully!")
+    st.success(f"Calculation (N={N}) executed successfully!")
