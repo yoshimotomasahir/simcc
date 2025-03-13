@@ -30,7 +30,7 @@ if st.button("Execute Calculation"):
     total_length = 0
     rs = np.random.RandomState(1)
     rs_mc = np.random.RandomState(1)
-    for i, material in enumerate(expanded_materials):
+    for k, material in enumerate(expanded_materials):
         material_name, length = get_material_name_length(material)
 
         dEtotal, dEcol, dEcc, charges, histories = GetMCEloss(
@@ -98,7 +98,23 @@ if st.button("Execute Calculation"):
         ax.grid(alpha=0.4)
         st.pyplot(fig)
 
-        st.write(f"Eout(simcc): {Ein - np.mean(dEtotal):.3f} MeV/u, Eloss(simcc): {np.mean(dEtotal):.3f} MeV/u, Eloss(CATIMA): {eloss:.3f} MeV/u ({(eloss)/(np.mean(dEtotal))-1:+.1%})")
+        st.markdown("""
+|{}|{}|{}|{}|{}|
+|--|--|--|--|--|
+|{}|{}|{}|{}|{}|
+|{}|{}|{}|{}|{}|
+""".format("Ein [MeV/u]","","Eout [MeV/u]","Eloss [MeV/u]","Sigma [MeV/u]",
+f"{Ein:.6g} (<sup>{A}</sup>{z2symbol[projectile_Z]}"+(f"<sup>{projectile_Z - charge_state}+</sup>" if k==0 else "<sup>all+</sup>")+")",
+"CATIMA",
+f"{Ein - eloss:.3f}",
+f"{eloss:.3f}",
+f"{eloss_sigma:.3f}",
+f"{material_name} {length:.5g} mm",
+"simcc",
+f"{Ein - np.mean(dEtotal):.3f} ({(Ein - np.mean(dEtotal))/(Ein - eloss)-1:+.3%})",
+f"{np.mean(dEtotal):.3f} ({(np.mean(dEtotal))/(eloss)-1:+.2%})",
+f"{np.std(dEtotal):.3f} (x{(np.std(dEtotal))/(eloss_sigma):.1f})",
+),unsafe_allow_html=True)
 
         total_length += length
         Ein = Ein - np.mean(dEtotal)
