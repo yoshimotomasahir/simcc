@@ -78,6 +78,7 @@ def energy2brho(energy, A, Q):
 
 def input_projectile():
     st.write("**Projectile**")
+    st.write("Configure the projectile parameters as the initial state for the calculations.")
     use_number_input = st.toggle("Number input")
 
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
@@ -108,7 +109,8 @@ def input_projectile():
 
 
 def input_materials():
-    st.write("**Material**")
+    st.write("**Material Selection**")
+    st.write("Select and configure materials. Press 'Add' to append it to the next material list.")
 
     material_units = ["mm", "μm", "cm", "mg/cm2"]
     material_unit = st.radio("Unit", material_units, key=f"material_unit", horizontal=True)
@@ -169,6 +171,9 @@ def input_materials():
                 item = f"{material} {st.session_state.thickness:.6g} mm"
             st.session_state.selected_materials.append(f"{item}-{st.session_state.j}")
             st.session_state.j += 1
+
+    st.write("**Material List**")
+    st.write("These materials are used in the calculations. Uncheck to remove.")
 
     for i, item in enumerate(st.session_state.selected_materials):
         checked = st.checkbox(item.split("-")[0], value=True, key=item)
