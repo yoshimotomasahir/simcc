@@ -73,5 +73,8 @@ if st.button("Execute Calculation"):
     for i in range(n):
         fig.add_annotation(x=i + 0.5, y=1, text=expanded_materials[i].split("-")[0], showarrow=False)
     st.plotly_chart(fig)
+    header = ["Length"] + ["Energy"] + [f"Z-Q={j}" for j in range(7)]
+    data_rows = [[str(lengths[j])] + [str(energies[1][j])] + list(map(str, np.array(Probs)[j].T)) for j in range(len(lengths))]
+    st.text_area("Raw data", "\n".join(["\t".join(data) for data in [header] + data_rows]), height=300)
 
     st.success("Calculation executed successfully!")
