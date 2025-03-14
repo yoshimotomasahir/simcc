@@ -155,9 +155,9 @@ def input_materials():
                 thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=500.0, step=1.0, value=1.0)
                 st.session_state.thickness = thickness * 10
             if category == "Gas":
-                st.write(f"{density*1000 * st.session_state.thickness*0.1:.6g} mg/cm3")
+                st.write(f"{density*1000 * st.session_state.thickness*0.1:.6g} mg/cm2")
             else:
-                st.write(f"{density * st.session_state.thickness*0.1:.6g} g/cm3")
+                st.write(f"{density * st.session_state.thickness*0.1:.6g} g/cm2")
 
     with col4:
         if st.button("Add"):
