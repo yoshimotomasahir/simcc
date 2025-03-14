@@ -3,6 +3,7 @@ import numpy as np
 from simcc import GetMaterial, GetMFP, GetMCHistories, GetMCDeltaE, GetMCProb
 import time
 
+
 def GetCAtimaCompound(zts, m_fractions):
     return [[0, z, m] for m, z in zip(m_fractions, zts)]
 
@@ -107,15 +108,15 @@ def GetMCEloss(A, Z, Q, energy, material, length, N=10000, random_state=None, hi
     return dEtotal, dEcol, dEcc, charges, histories
 
 
-def GetAnalyticalEloss(A, Z, energy, material, length, z_effective = 1):
+def GetAnalyticalEloss(A, Z, energy, material, length, z_effective=1, density=0):
 
     # 物質情報を取得
     result = GetMaterial(material)
-    zts, m_fractions, density, solid_gas = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
+    zts, m_fractions, nominal_density, solid_gas = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
     compound = GetCAtimaCompound(zts, m_fractions)
 
     # 分割数を検討
-    mat = catima.Material(compound, density=density)
+    mat = catima.Material(compound, density=nominal_density if density == 0 else density)
     mat.thickness_cm(length)
     layer = catima.Layers()
     layer.add(mat)
@@ -131,3 +132,15 @@ def GetAnalyticalEloss(A, Z, energy, material, length, z_effective = 1):
     Eloss = res.total_result.Ein - res.total_result.Eout
 
     return Eloss, res.total_result.sigma_E
+
+
+def GetAnalyticalRange(A, Z, energy, material, density=0):
+    result = GetMaterial(material)
+    zts, m_fractions, nominal_density, solid_gas = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
+    compound = GetCAtimaCompound(zts, m_fractions)
+    mat = catima.Material(compound)
+    config = catima.Config()
+    config.z_effective = 1
+    res = catima.calculate(catima.Projectile(A=A, Z=Z, Q=0, T=energy), mat, config)
+    density = nominal_density if density == 0 else density
+    return res.range / density, res.sigma_r / density
