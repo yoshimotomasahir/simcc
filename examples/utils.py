@@ -26,7 +26,7 @@ material_list = {
     "Strippers": ["Al", "Ta", "W", "Pt", "Au"],
     "Degraders": ["Al", "Cu", "Acrylic"],
     "Targets": ["Be", "W", "Carbon"],
-    "Others": ["Plastic", "Diamond", "Kapton", "Mylar"],
+    "Others": ["Plastic", "Diamond", "Kapton", "Mylar", "EmulsionE07"],
     "Single substance": [f"Z={Z}" for Z in range(1, 93)],
 }
 
