@@ -213,6 +213,11 @@ def GetMaterial(material, density_factor=1):
         density = 1.18
         zts, m_fractions = [1, 6, 8], [8, 5, 2]  #
 
+    elif material == "EmulsionE07":
+        solid_gas = "solid"
+        density = 3.4
+        zts, m_fractions = [1, 6, 7, 8, 16, 35, 47, 53], [1.597317, 0.767649, 0.219181, 0.529395, 0.000936, 0.404110, 0.411614, 0.007407]
+
     else:
         ZTarget = None
         if material == "GasHe":
