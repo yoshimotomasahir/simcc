@@ -45,6 +45,7 @@ if st.button("Execute Calculation"):
         )
 
         eloss, eloss_sigma = GetAnalyticalEloss(A, projectile_Z, Ein, material_name, length*0.1)
+        elossm1, _ = GetAnalyticalEloss(A, projectile_Z-1, Ein, material_name, length*0.1)
         N=10000
         dEcatima = rs.normal(loc=eloss, scale=eloss_sigma, size=N)
 
@@ -99,24 +100,44 @@ if st.button("Execute Calculation"):
         st.pyplot(fig)
 
         st.markdown("""
-|{}|{}|{}|{}|{}|
-|--|--|--|--|--|
-|{}|{}|{}|{}|{}|
-|{}|{}|{}|{}|{}|
-""".format("Ein [MeV/u]","","Eout [MeV/u]","Eloss [MeV/u]","Sigma [MeV/u]",
-f"{Ein:.6g} (<sup>{A}</sup>{z2symbol[projectile_Z]}"+(f"<sup>{projectile_Z - charge_state}+</sup>" if k==0 else "<sup>all+</sup>")+")",
+|Ein [MeV/u]| |Eout|Eloss|Sigma|Zres<sup>*1</sup>|Eres<sup>*2</sup>|
+|--|--|--|--|--|--|--|
+|{}|{}|{}|{}|{}|{}|{}|
+|{}|{}|{}|{}|{}|{}|{}|
+|{}|{}|{}|{}|{}|{}|{}|
+""".format(
+f"{Ein:.6g}",
 "CATIMA",
 f"{Ein - eloss:.3f}",
 f"{eloss:.3f}",
 f"{eloss_sigma:.3f}",
-f"{material_name} {length:.5g} mm",
+f"{(eloss-elossm1)/eloss_sigma:.2f}σ",
+f"{eloss_sigma/eloss:.2%}",
+
+f"<sup>{A}</sup>{z2symbol[projectile_Z]}"+(f"<sup>{projectile_Z - charge_state}+</sup>" if k==0 else "<sup>all+</sup>"),
 "simcc",
-f"{Ein - np.mean(dEtotal):.3f} ({(Ein - np.mean(dEtotal))/(Ein - eloss)-1:+.3%})",
-f"{np.mean(dEtotal):.3f} ({(np.mean(dEtotal))/(eloss)-1:+.2%})",
-f"{np.std(dEtotal):.3f} (x{(np.std(dEtotal))/(eloss_sigma):.1f})",
+f"{Ein - np.mean(dEtotal):.3f}",
+f"{np.mean(dEtotal):.3f}",
+f"{np.std(dEtotal):.3f}",
+f"{(eloss-elossm1)/np.std(dEtotal):.2f}σ",
+f"{np.std(dEtotal)/np.mean(dEtotal):.2%}",
+
+f"{material_name} {length:.5g} mm",
+"s/C",
+f"100{(Ein - np.mean(dEtotal))/(Ein - eloss)-1:+.3%}",
+f"100{(np.mean(dEtotal))/(eloss)-1:+.2%}",
+f"{(np.std(dEtotal))/(eloss_sigma):.2f}",
+f"{(eloss-elossm1):.3f}<sup>*3</sup>",
+f"{(eloss-elossm1)/eloss:.2%}<sup>*4</sup>",
 ),unsafe_allow_html=True)
 
         total_length += length
         Ein = Ein - np.mean(dEtotal)
 
     st.success(f"Calculation (N={N}) executed successfully!")
+
+st.html("""
+*1: Sigma / (Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub>)<br>
+*2: Sigma / Eloss<br>
+*3: Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub><br>
+*4: (Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub>)/Eloss<sub>Z</sub>""")
