@@ -76,6 +76,16 @@ def energy2brho(energy, A, Q):
     return beta2brho(energy2beta(energy), A, Q)
 
 
+def tof2beta(FL, TOF):
+    beta = FL/TOF/clight
+    return beta
+
+
+def beta2tof(FL, beta):
+    TOF = FL/clight/beta
+    return TOF
+
+
 def input_projectile():
     st.write("**Projectile**: Configure the projectile parameters as the initial state for the calculations.")
     use_number_input = st.toggle("Number input")
