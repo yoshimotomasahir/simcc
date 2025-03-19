@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 st.set_page_config(page_title="Equilibrium state -SimCC-", page_icon="🌠")
-st.title("Equilibrium state")
+st.header("Equilibrium state")
 
 st.write(
     "The charge-state equilibrium thickness is defined as the point where the probability difference from the equilibrium becomes less than $1/e^6$. To reduce calculation costs, **no energy losses** in the material are considered."

@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 st.set_page_config(page_title="Transient  state -SimCC-", page_icon="🌠")
-st.title("Transient  state")
+st.header("Transient  state")
 
 projectile_Z, energy, A, charge_state = input_projectile()
 
