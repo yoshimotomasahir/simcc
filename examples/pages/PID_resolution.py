@@ -144,5 +144,5 @@ for i, j in np.ndindex(X.shape):
 heatmap = go.Heatmap(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
 contour = go.Contour(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
 fig = go.Figure(data=[heatmap, contour])
-fig.update_layout(title="BigRIPS A/Q resolution [%]", xaxis_title="PPAC resolution [mm]", yaxis_title="TOF resolution [ps]")
+fig.update_layout(title="A/Q resolution [%]", xaxis_title="PPAC resolution [mm]", yaxis_title="TOF resolution [ps]")
 st.plotly_chart(fig)
