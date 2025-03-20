@@ -201,11 +201,11 @@ for i, j in np.ndindex(X.shape):
 heatmap1 = go.Heatmap(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
 contour1 = go.Contour(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
 fig = go.Figure(data=[heatmap1, contour1])
-fig.update_layout(title="A/Q Resolution [%] (std.dev.)", xaxis_title="PPAC resolution [mm]", yaxis_title="TOF resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
+fig.update_layout(title="A/Q Resolution [%] (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
 st.plotly_chart(fig)
 
 heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
 contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
 fig = go.Figure(data=[heatmap2, contour2])
-fig.update_layout(title="Zdeg Resolution (std.dev.)", xaxis_title="PPAC resolution [mm]", yaxis_title="TOF resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
+fig.update_layout(title="Zdeg Resolution (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
 st.plotly_chart(fig)
