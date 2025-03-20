@@ -19,7 +19,7 @@ with col1:
 with col2:
     A = st.number_input("Mass Number (A)", value=132, step=1)
 with col3:
-    dQ = st.number_input("Z - Charge State (Q)", value=0, step=4)
+    dQ = st.number_input("Z - Charge State (Q)", value=0, step=1, max_value=4)
     Q = Z - dQ
 with col4:
     Energy = st.number_input("Energy [MeV/u] at F3", value=300, step=1)
@@ -48,23 +48,10 @@ with col1:
     F5_deg_center = float(F5_deg.split()[1]) * 0.1  # cm
     F5_deg_angle = float(F5_deg.split()[3])  # mrad
 with col2:
-    F5_deg_error = st.selectbox(
-        "Thickness Ununiformity",
-        options=[
-            "0 μm",
-            "1 μm",
-            "2 μm",
-            "5 μm",
-            "10 μm",
-            "15 μm",
-            "20 μm",
-            "25 μm",
-        ],
-        index=4,
-    )
-    F5_deg_error = float(F5_deg_error.split()[0]) * 0.1 * 0.001
+    F5_deg_error = st.number_input("Thickness Uniformity [μm]", value=10, step=1, min_value=0) # um
+    F5_deg_error = F5_deg_error * 0.1 * 0.001 # cm
 with col3:
-    Straggling_enhancement = st.number_input("Straggling Enhancement by cc", value=1.0, step=0.1, min_value=1.0)
+    Straggling_enhancement = st.number_input("Eloss Straggling Enhancement by cc", value=1.0, step=0.1, min_value=1.0)
 
 
 eloss, straggling = GetAnalyticalEloss(A, Z, Energy, "Al", F5_deg_center)
