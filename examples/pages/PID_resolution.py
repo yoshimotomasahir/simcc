@@ -9,8 +9,8 @@ import sys
 sys.path.append("..")
 from utils import *
 
-st.set_page_config(page_title="PID resolution -SimCC-", page_icon="🌠")
-st.header("PID resolution simulator for BigRIPS")
+st.set_page_config(page_title="PID Resolution -SimCC-", page_icon="🌠")
+st.header("PID Resolution Simulator for BigRIPS")
 st.write("Under development.")
 
 col1, col2, col3, col4 = st.columns(4)
@@ -19,7 +19,8 @@ with col1:
 with col2:
     A = st.number_input("Mass Number (A)", value=132, step=1)
 with col3:
-    Q = st.number_input("Charge State (Q)", value=50, step=1)
+    dQ = st.number_input("Z - Charge State (Q)", value=0, step=4)
+    Q = Z - dQ
 with col4:
     Energy = st.number_input("Energy [MeV/u]", value=300, step=1)
 
@@ -43,12 +44,12 @@ with col1:
         "Al 9.0 mm 7.714 mrad",
         "Al 10.0 mm 8.587 mrad",
     ]
-    F5_deg = st.selectbox("F5 degrader", options=deg_list, index=4)
+    F5_deg = st.selectbox("F5 Degrader", options=deg_list, index=4)
     F5_deg_center = float(F5_deg.split()[1]) * 0.1  # cm
     F5_deg_angle = float(F5_deg.split()[3])  # mrad
 with col2:
     F5_deg_error = st.selectbox(
-        "Thickness ununiformity",
+        "Thickness Ununiformity",
         options=[
             "0 μm",
             "1 μm",
@@ -63,7 +64,7 @@ with col2:
     )
     F5_deg_error = float(F5_deg_error.split()[0]) * 0.1 * 0.001
 with col3:
-    Straggling_enhancement = st.number_input("Straggling enhancement by cc", value=1.0, step=0.1, min_value=1.0)
+    Straggling_enhancement = st.number_input("Straggling Enhancement by cc", value=1.0, step=0.1, min_value=1.0)
 
 
 eloss, straggling = GetAnalyticalEloss(A, Z, Energy, "Al", F5_deg_center)
@@ -213,11 +214,11 @@ for i, j in np.ndindex(X.shape):
 heatmap1 = go.Heatmap(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
 contour1 = go.Contour(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
 fig = go.Figure(data=[heatmap1, contour1])
-fig.update_layout(title="A/Q resolution [%] (std.dev.)", xaxis_title="PPAC resolution [mm]", yaxis_title="TOF resolution [ps]",margin=dict(l=5, r=5, t=30, b=5),width=1000,height=300)
+fig.update_layout(title="A/Q Resolution [%] (std.dev.)", xaxis_title="PPAC resolution [mm]", yaxis_title="TOF resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
 st.plotly_chart(fig)
 
 heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
 contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
 fig = go.Figure(data=[heatmap2, contour2])
-fig.update_layout(title="Zdeg resolution (std.dev.)", xaxis_title="PPAC resolution [mm]", yaxis_title="TOF resolution [ps]",margin=dict(l=5, r=5, t=30, b=5),width=1000,height=300)
+fig.update_layout(title="Zdeg Resolution (std.dev.)", xaxis_title="PPAC resolution [mm]", yaxis_title="TOF resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
 st.plotly_chart(fig)
