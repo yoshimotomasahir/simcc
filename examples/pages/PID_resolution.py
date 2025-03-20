@@ -11,7 +11,7 @@ from utils import *
 
 st.set_page_config(page_title="PID Resolution -SimCC-", page_icon="🌠")
 st.header("PID Resolution Simulator for BigRIPS")
-st.write("Under development.")
+st.write("Energy loss other than the F5 degrader is neglected.")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
@@ -22,7 +22,7 @@ with col3:
     dQ = st.number_input("Z - Charge State (Q)", value=0, step=4)
     Q = Z - dQ
 with col4:
-    Energy = st.number_input("Energy [MeV/u]", value=300, step=1)
+    Energy = st.number_input("Energy [MeV/u] at F3", value=300, step=1)
 
 col1, col2, col3 = st.columns(3)
 with col1:
