@@ -27,6 +27,7 @@ with col4:
 col1, col2, col3 = st.columns(3)
 with col1:
     deg_list = [
+        "Nothing 0 mm 0 mrad",
         "Al 0.7 mm 0.61 mrad",
         "Al 1.0 mm 0.43 mrad",
         "Al 1.0 mm 0.95 mrad",
@@ -44,19 +45,23 @@ with col1:
         "Al 9.0 mm 7.714 mrad",
         "Al 10.0 mm 8.587 mrad",
     ]
-    F5_deg = st.selectbox("F5 Degrader", options=deg_list, index=4)
+    F5_deg = st.selectbox("F5 Degrader", options=deg_list, index=5)
     F5_deg_center = float(F5_deg.split()[1]) * 0.1  # cm
     F5_deg_angle = float(F5_deg.split()[3])  # mrad
 with col2:
-    F5_deg_error = st.number_input("Thickness Uniformity [μm]", value=10, step=1, min_value=0) # um
-    F5_deg_error = F5_deg_error * 0.1 * 0.001 # cm
+    F5_deg_error = st.number_input("Thickness Uniformity [μm]", value=10, step=1, min_value=0)  # um
+    F5_deg_error = F5_deg_error * 0.1 * 0.001  # cm
 with col3:
     Straggling_enhancement = st.number_input("Eloss Straggling Enhancement by cc", value=1.0, step=0.1, min_value=1.0)
 
 
-eloss, straggling = GetAnalyticalEloss(A, Z, Energy, "Al", F5_deg_center)
-F5_deg_thickness = ufloat(F5_deg_center, F5_deg_error)
-F5_deg_thickness *= ufloat(1, straggling / eloss * Straggling_enhancement)
+if F5_deg_center > 0:
+    eloss, straggling = GetAnalyticalEloss(A, Z, Energy, "Al", F5_deg_center)
+    F5_deg_thickness = ufloat(F5_deg_center, F5_deg_error)
+    F5_deg_thickness *= ufloat(1, straggling / eloss * Straggling_enhancement)
+else:
+    eloss = 0
+    F5_deg_thickness = ufloat(0, 0)
 
 energy35_nominal = Energy
 energy57_nominal = Energy - eloss
@@ -192,11 +197,13 @@ for i, j in np.ndindex(X.shape):
     brho35 = brho35_nominal * (1 + delta35 * 0.01)
     brho57 = brho57_nominal * (1 + delta57 * 0.01)
     AOQ35, AOQ57, beta35, beta57, _, _ = calcAOQ_from_2brho(brho35, brho57, fl35, fl57, TOF37)
-    Zdeg = calc_zdeg(F5X, F5A, beta35, beta57, brho35, brho57, F5_deg_thickness, F5_deg_angle, Z)
-
     AOQ35s[i, j] = AOQ35.s / AOQ35.n * 100
     AOQ57s[i, j] = AOQ57.s / AOQ35.n * 100
-    Zdegs[i, j] = Zdeg.s
+
+    if F5_deg_thickness.n > 0:
+        Zdeg = calc_zdeg(F5X, F5A, beta35, beta57, brho35, brho57, F5_deg_thickness, F5_deg_angle, Z)
+        Zdegs[i, j] = Zdeg.s
+
 
 heatmap1 = go.Heatmap(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
 contour1 = go.Contour(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
@@ -204,8 +211,9 @@ fig = go.Figure(data=[heatmap1, contour1])
 fig.update_layout(title="A/Q Resolution [%] (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
 st.plotly_chart(fig)
 
-heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
-contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
-fig = go.Figure(data=[heatmap2, contour2])
-fig.update_layout(title="Zdeg Resolution (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
-st.plotly_chart(fig)
+if F5_deg_thickness.n > 0:
+    heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
+    contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
+    fig = go.Figure(data=[heatmap2, contour2])
+    fig.update_layout(title="Zdeg Resolution (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
+    st.plotly_chart(fig)
