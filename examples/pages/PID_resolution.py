@@ -12,7 +12,7 @@ from utils import *
 
 st.set_page_config(page_title="PID Resolution -SimCC-", page_icon="🌠")
 st.header("PID Resolution Simulator for BigRIPS")
-st.write("Energy loss other than the F5 degrader is neglected.")
+st.write("Energy loss other than the F5 degrader is neglected. The resolution is the **standard deviation**.")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
@@ -112,11 +112,11 @@ if "matrixF7F5" not in st.session_state:
 matrix35 = st.session_state.matrixF3F5
 matrix75 = st.session_state.matrixF7F5
 
-PPAC_error = np.linspace(0.1, 0.8, 15)
-TOF_error = np.linspace(10, 90, 9)
+PPAC_error = np.linspace(0.0, 0.8, 17)
+TOF_error = np.linspace(0, 90, 10)
 X, Y = np.meshgrid(PPAC_error, TOF_error)
-AOQ35s = np.zeros_like(X)
-AOQ57s = np.zeros_like(X)
+relative_AOQ35s = np.zeros_like(X)
+absolute_AOQ35s = np.zeros_like(X)
 Zdegs = np.zeros_like(X)
 
 
@@ -144,23 +144,29 @@ for i, j in np.ndindex(X.shape):
     brho35 = brho35_nominal * (1 + delta35 * 0.01)
     brho57 = brho57_nominal * (1 + delta57 * 0.01)
     AOQ35, AOQ57, beta35, beta57, _, _ = calcAOQ_from_2brho(brho35, brho57, fl35, fl57, TOF37)
-    AOQ35s[i, j] = AOQ35.s / AOQ35.n * 100
-    AOQ57s[i, j] = AOQ57.s / AOQ35.n * 100
+    relative_AOQ35s[i, j] = AOQ35.s / AOQ35.n * 100
+    absolute_AOQ35s[i, j] = AOQ35.s
 
     if F5_deg_thickness.n > 0:
         Zdeg = calc_zdeg(F5X, F5A, beta35, beta57, brho35, brho57, F5_deg_thickness, F5_deg_angle, Z)
         Zdegs[i, j] = Zdeg.s
 
 
-heatmap1 = go.Heatmap(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
-contour1 = go.Contour(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
+heatmap1 = go.Heatmap(z=relative_AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
+contour1 = go.Contour(z=relative_AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
 fig = go.Figure(data=[heatmap1, contour1])
-fig.update_layout(title="A/Q Resolution [%] (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
+fig.update_layout(title="Relative A/Q Resolution [%]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
 
 if F5_deg_thickness.n > 0:
     heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
     contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
     fig = go.Figure(data=[heatmap2, contour2])
-    fig.update_layout(title="Zdeg Resolution (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
+    fig.update_layout(title="Absolute Zdeg Resolution", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
     st.plotly_chart(fig)
+
+heatmap3 = go.Heatmap(z=absolute_AOQ35s * 1000, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
+contour3 = go.Contour(z=absolute_AOQ35s * 1000, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
+fig = go.Figure(data=[heatmap3, contour3])
+fig.update_layout(title="Absolute A/Q Resolution [10^-3]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
+st.plotly_chart(fig)
