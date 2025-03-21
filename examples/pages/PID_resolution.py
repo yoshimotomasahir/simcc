@@ -112,8 +112,8 @@ if "matrixF7F5" not in st.session_state:
 matrix35 = st.session_state.matrixF3F5
 matrix75 = st.session_state.matrixF7F5
 
-PPAC_error = np.linspace(0.1, 1.0, 19)
-TOF_error = np.linspace(10, 120, 12)
+PPAC_error = np.linspace(0.1, 0.8, 15)
+TOF_error = np.linspace(10, 90, 9)
 X, Y = np.meshgrid(PPAC_error, TOF_error)
 AOQ35s = np.zeros_like(X)
 AOQ57s = np.zeros_like(X)
@@ -155,12 +155,12 @@ for i, j in np.ndindex(X.shape):
 heatmap1 = go.Heatmap(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
 contour1 = go.Contour(z=AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
 fig = go.Figure(data=[heatmap1, contour1])
-fig.update_layout(title="A/Q Resolution [%] (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
+fig.update_layout(title="A/Q Resolution [%] (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
 
 if F5_deg_thickness.n > 0:
     heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
     contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
     fig = go.Figure(data=[heatmap2, contour2])
-    fig.update_layout(title="Zdeg Resolution (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=1000, height=300)
+    fig.update_layout(title="Zdeg Resolution (std.dev.)", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
     st.plotly_chart(fig)
