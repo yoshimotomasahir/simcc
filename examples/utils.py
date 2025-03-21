@@ -30,6 +30,26 @@ material_list = {
     "Single substance": [f"Z={Z}" for Z in range(1, 93)],
 }
 
+F5_deg_list = [
+    "Nothing 0 mm 0 mrad",
+    "Al 0.7 mm 0.61 mrad",
+    "Al 1.0 mm 0.43 mrad",
+    "Al 1.0 mm 0.95 mrad",
+    "Al 1.5 mm 1.187 mrad",
+    "Al 2.0 mm 1.60 mrad",
+    "Al 2.2 mm 1.80 mrad",
+    "Al 2.5 mm 2.14 mrad",
+    "Al 3.0 mm 2.62 mrad",
+    "Al 3.5 mm 2.80 mrad",
+    "Al 3.5 mm 3.00 mrad",
+    "Al 4.5 mm 3.70 mrad",
+    "Al 5.0 mm 4.25 mrad",
+    "Al 7.0 mm 5.969 mrad",
+    "Al 8.0 mm 7.3129 mrad",
+    "Al 9.0 mm 7.714 mrad",
+    "Al 10.0 mm 8.587 mrad",
+]
+
 clight = 299.792458  # mm/ns
 mnucleon = 931.49432  # MeV
 
@@ -77,13 +97,30 @@ def energy2brho(energy, A, Q):
 
 
 def tof2beta(FL, TOF):
-    beta = FL/TOF/clight
+    beta = FL / TOF / clight
     return beta
 
 
 def beta2tof(FL, beta):
-    TOF = FL/clight/beta
+    TOF = FL / clight / beta
     return TOF
+
+
+def get_matrix(Fa, Fb):
+    import requests
+
+    url = "https://ribf.riken.jp/BigRIPSInfo/optics/fig/bStandard.txt"
+    response = requests.get(url)
+    assert response.status_code == 200
+    data = response.text
+    lines = data.splitlines()
+    mat = []
+    for i, line in enumerate(lines):
+        if line.replace("\n", "").replace("\r", "") == "F{}-F{}".format(Fa, Fb):
+            for j in range(6):
+                mat.append([float(f) for f in lines[i + j + 1].split()[0:5]])
+            assert lines[i + 7][0] == "-"
+            return mat
 
 
 def input_projectile():
@@ -217,5 +254,5 @@ def get_material_name_length(material):
     if material.split()[2] == "mm":
         length = float(material.split()[1])
     elif material.split()[2] == "g/cm2":
-        length = float(material.split()[1])*10
+        length = float(material.split()[1]) * 10
     return material_name, length

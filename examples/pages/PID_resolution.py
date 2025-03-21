@@ -26,26 +26,7 @@ with col4:
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    deg_list = [
-        "Nothing 0 mm 0 mrad",
-        "Al 0.7 mm 0.61 mrad",
-        "Al 1.0 mm 0.43 mrad",
-        "Al 1.0 mm 0.95 mrad",
-        "Al 1.5 mm 1.187 mrad",
-        "Al 2.0 mm 1.60 mrad",
-        "Al 2.2 mm 1.80 mrad",
-        "Al 2.5 mm 2.14 mrad",
-        "Al 3.0 mm 2.62 mrad",
-        "Al 3.5 mm 2.80 mrad",
-        "Al 3.5 mm 3.00 mrad",
-        "Al 4.5 mm 3.70 mrad",
-        "Al 5.0 mm 4.25 mrad",
-        "Al 7.0 mm 5.969 mrad",
-        "Al 8.0 mm 7.3129 mrad",
-        "Al 9.0 mm 7.714 mrad",
-        "Al 10.0 mm 8.587 mrad",
-    ]
-    F5_deg = st.selectbox("F5 Degrader", options=deg_list, index=5)
+    F5_deg = st.selectbox("F5 Degrader", options=F5_deg_list, index=5)
     F5_deg_center = float(F5_deg.split()[1]) * 0.1  # cm
     F5_deg_angle = float(F5_deg.split()[3])  # mrad
 with col2:
@@ -53,20 +34,6 @@ with col2:
     F5_deg_error = F5_deg_error * 0.1 * 0.001  # cm
 with col3:
     Straggling_enhancement = st.number_input("Eloss Straggling Enhancement by cc", value=1.0, step=0.1, min_value=1.0)
-
-
-if F5_deg_center > 0:
-    eloss, straggling = GetAnalyticalEloss(A, Z, Energy, "Al", F5_deg_center)
-    F5_deg_thickness = ufloat(F5_deg_center, F5_deg_error)
-    F5_deg_thickness *= ufloat(1, straggling / eloss * Straggling_enhancement)
-else:
-    eloss = 0
-    F5_deg_thickness = ufloat(0, 0)
-
-energy35_nominal = Energy
-energy57_nominal = Energy - eloss
-brho35_nominal = energy2brho(energy35_nominal, A, Q)
-brho57_nominal = energy2brho(energy57_nominal, A, Q)
 
 
 def calc_delta_ai(Xi, Xf, Af, mat):
@@ -77,23 +44,6 @@ def calc_delta_ai(Xi, Xf, Af, mat):
     recoAi = mat[5][1] * Xf - mat[5][0] * Af - (mat[5][1] * mat[0][0] - mat[5][0] * mat[0][1]) * Xi
     recoAi = -recoAi / D
     return delta, recoAi
-
-
-def get_matrix(Fa, Fb):
-    import requests
-
-    url = "https://ribf.riken.jp/BigRIPSInfo/optics/fig/bStandard.txt"
-    response = requests.get(url)
-    assert response.status_code == 200
-    data = response.text
-    lines = data.splitlines()
-    mat = []
-    for i, line in enumerate(lines):
-        if line.replace("\n", "").replace("\r", "") == "F{}-F{}".format(Fa, Fb):
-            for j in range(6):
-                mat.append([float(f) for f in lines[i + j + 1].split()[0:5]])
-            assert lines[i + 7][0] == "-"
-            return mat
 
 
 def calc_fl(Xi, Ai, delta, mat, flc):
@@ -109,17 +59,6 @@ def calcAOQ(Brho, beta):
     gamma = 1.0 / ((1 - beta) * (1 + beta)) ** 0.5
     AOQ = Brho * clight / mnucleon / beta / gamma
     return AOQ
-
-
-def get_flc(Fa, Fb):
-    if Fa == 3 and Fb == 5:
-        return 23488.0
-    elif Fa == 5 and Fb == 7:
-        return 23488.0
-    elif Fa == 3 and Fb == 7:
-        return 23488.0 * 2
-    else:
-        raise
 
 
 def calcAOQ_from_2brho(brho35, brho57, fl35, fl57, TOF37):
@@ -139,25 +78,6 @@ def calcAOQ_from_2brho(brho35, brho57, fl35, fl57, TOF37):
     return AOQ35, AOQ57, beta35, beta57, gamma35, gamma57
 
 
-PPAC_error = np.linspace(0.1, 1.0, 19)
-TOF_error = np.linspace(10, 120, 12)
-X, Y = np.meshgrid(PPAC_error, TOF_error)
-AOQ35s = np.zeros_like(X)
-AOQ57s = np.zeros_like(X)
-Zdegs = np.zeros_like(X)
-
-
-def focus2int(FaFb):
-    return int(FaFb.split("-")[0].replace("F", "")), int(FaFb.split("-")[1].replace("F", ""))
-
-
-if "matrix" not in st.session_state:
-    st.session_state.matrix = {}
-for FaFb in ["F3-F5", "F7-F5"]:
-    if FaFb not in st.session_state.matrix:
-        st.session_state.matrix[FaFb] = get_matrix(*focus2int(FaFb))
-
-
 def calc_zdeg(F5X, F5A, beta35, beta57, brho35, brho57, d0, angle, Z):
     zpos = 0
     pos = F5X + zpos * umath.tan(F5A / 1000)
@@ -171,27 +91,53 @@ def calc_zdeg(F5X, F5A, beta35, beta57, brho35, brho57, d0, angle, Z):
     return zdeg
 
 
+if F5_deg_center > 0:
+    eloss, straggling = GetAnalyticalEloss(A, Z, Energy, "Al", F5_deg_center)
+    F5_deg_thickness = ufloat(F5_deg_center, F5_deg_error)
+    F5_deg_thickness *= ufloat(1, straggling / eloss * Straggling_enhancement)
+else:
+    eloss = 0
+    F5_deg_thickness = ufloat(0, 0)
+
+
+energy35_nominal = Energy
+energy57_nominal = Energy - eloss
+brho35_nominal = energy2brho(energy35_nominal, A, Q)
+brho57_nominal = energy2brho(energy57_nominal, A, Q)
+if "matrixF3F5" not in st.session_state:
+    st.session_state.matrixF3F5 = get_matrix(3, 5)
+if "matrixF7F5" not in st.session_state:
+    st.session_state.matrixF7F5 = get_matrix(7, 5)
+matrix35 = st.session_state.matrixF3F5
+matrix75 = st.session_state.matrixF7F5
+
+PPAC_error = np.linspace(0.1, 1.0, 19)
+TOF_error = np.linspace(10, 120, 12)
+X, Y = np.meshgrid(PPAC_error, TOF_error)
+AOQ35s = np.zeros_like(X)
+AOQ57s = np.zeros_like(X)
+Zdegs = np.zeros_like(X)
+
+
 for i, j in np.ndindex(X.shape):
     xval = X[i, j]
-    F3X = ufloat(0, xval)
-    F5X = ufloat(0, xval)
-    F7X = ufloat(0, xval)
+    F3X, F5X, F7X = ufloat(0, xval), ufloat(0, xval), ufloat(0, xval)
     F3A, F5A, F7A = ufloat(0, xval * 2), ufloat(0, xval * 2), ufloat(0, xval * 2)
 
     yval = Y[i, j]
-    F3TOF = ufloat(0, yval / 1000)
-    F7TOF = ufloat(0, yval / 1000)
+    timingF3 = ufloat(0, yval / 1000)
+    timingF7 = ufloat(0, yval / 1000)
 
-    delta35, _ = calc_delta_ai(F3X, F5X, F5A, st.session_state.matrix["F3-F5"])
-    delta57, _ = calc_delta_ai(F7X, F5X, F5A, st.session_state.matrix["F7-F5"])
+    delta35, _ = calc_delta_ai(F3X, F5X, F5A, matrix35)
+    delta57, _ = calc_delta_ai(F7X, F5X, F5A, matrix75)
 
-    fl35 = calc_fl(F3X, F3A, delta35, st.session_state.matrix["F3-F5"], get_flc(3, 5))
-    fl57 = calc_fl(F7X, F7A, delta57, st.session_state.matrix["F7-F5"], get_flc(5, 7))
+    fl35 = calc_fl(F3X, F3A, delta35, matrix35, 23488.0)
+    fl57 = calc_fl(F7X, F7A, delta57, matrix75, 23488.0)
 
     TOF35 = beta2tof(fl35, energy2beta(energy35_nominal))
-    TOF35 += F3TOF
+    TOF35 += timingF3
     TOF57 = beta2tof(fl57, energy2beta(energy57_nominal))
-    TOF57 += F7TOF
+    TOF57 += timingF7
     TOF37 = TOF35 + TOF57
 
     brho35 = brho35_nominal * (1 + delta35 * 0.01)
