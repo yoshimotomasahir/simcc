@@ -123,12 +123,12 @@ f"{(eloss-elossm1)/np.std(dEtotal):.2f}σ",
 f"{np.std(dEtotal)/np.mean(dEtotal):.2%}",
 
 f"{material_name} {length:.5g} mm",
-"s/C",
+"cc/ATIMA",
 f"100{(Ein - np.mean(dEtotal))/(Ein - eloss)-1:+.3%}",
 f"100{(np.mean(dEtotal))/(eloss)-1:+.2%}",
-f"{(np.std(dEtotal))/(eloss_sigma):.2f}",
-f"{(eloss-elossm1):.3f}<sup>*3</sup>",
-f"{(eloss-elossm1)/eloss:.2%}<sup>*4</sup>",
+f"{(np.std(dEtotal))/(eloss_sigma):.2f}<sup>*3</sup>",
+f"{(eloss-elossm1):.3f}<sup>*4</sup>",
+f"{(eloss-elossm1)/eloss:.2%}<sup>*5</sup>",
 ),unsafe_allow_html=True)
 
         total_length += length
@@ -139,5 +139,7 @@ f"{(eloss-elossm1)/eloss:.2%}<sup>*4</sup>",
 st.html("""
 *1: Sigma / (Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub>)<br>
 *2: Sigma / Eloss<br>
-*3: Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub><br>
-*4: (Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub>)/Eloss<sub>Z</sub>""")
+*3: Eloss Straggling Enhancement by cc<br>
+*4: Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub><br>
+*5: (Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub>)/Eloss<sub>Z</sub><br>
+""")
