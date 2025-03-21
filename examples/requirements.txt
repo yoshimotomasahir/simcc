@@ -5,4 +5,4 @@ scipy>=1.11.4
 matplotlib
 plotly
 uncertainties
--e git+https://github.com/yoshimotomasahir/simcc.git#egg=simcc
+git+https://github.com/yoshimotomasahir/simcc.git#egg=simcc
