@@ -16,14 +16,14 @@ st.write("Energy loss other than the F5 degrader is neglected.")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    Z = st.number_input("Atomic Number (Z)", value=50, step=1)
+    Z = st.number_input("Atomic Number (Z)", value=50, step=1, min_value=1)
 with col2:
-    A = st.number_input("Mass Number (A)", value=132, step=1)
+    A = st.number_input("Mass Number (A)", value=132, step=1, min_value=Z)
 with col3:
-    dQ = st.number_input("Z - Charge State (Q)", value=0, step=1, max_value=4)
+    dQ = st.number_input("Z - Charge State (Q)", value=0, step=1, max_value=4, min_value=0)
     Q = Z - dQ
 with col4:
-    Energy = st.number_input("Energy [MeV/u] at F3", value=300, step=1)
+    Energy = st.number_input("Energy [MeV/u] at F3", value=300, step=1, min_value=50)
 
 col1, col2, col3 = st.columns(3)
 with col1:
