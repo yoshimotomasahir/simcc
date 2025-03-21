@@ -1,5 +1,6 @@
 import streamlit as st
 from simcc import *
+from simeloss import *
 from uncertainties import ufloat
 import uncertainties.umath as umath
 import plotly.graph_objects as go
