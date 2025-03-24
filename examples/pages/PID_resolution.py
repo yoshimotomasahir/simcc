@@ -13,6 +13,7 @@ from utils import *
 st.set_page_config(page_title="PID Resolution -SimCC-", page_icon="🌠")
 st.header("PID Resolution Simulator for BigRIPS")
 st.write("Energy loss other than the F5 degrader is neglected. The resolution is the **standard deviation**.")
+st.markdown("The source code is available on [Github](https://github.com/yoshimotomasahir/simcc/blob/main/examples/pages/PID_resolution.py).")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
