@@ -116,9 +116,9 @@ matrix75 = st.session_state.matrixF7F5
 position_errors = np.linspace(0.0, 0.8, 17)
 timing_errors = np.linspace(0, 90, 10)
 mesh_grid = np.meshgrid(position_errors, timing_errors)
-relative_AOQ35s = np.zeros_like(mesh_grid[0])
-absolute_AOQ35s = np.zeros_like(mesh_grid[0])
-Zdegs = np.zeros_like(mesh_grid[0])
+relative_AOQ35_errors = np.zeros_like(mesh_grid[0])
+absolute_AOQ35_errors = np.zeros_like(mesh_grid[0])
+Zdeg_errors = np.zeros_like(mesh_grid[0])
 
 
 for i, j in np.ndindex(mesh_grid[0].shape):
@@ -145,29 +145,29 @@ for i, j in np.ndindex(mesh_grid[0].shape):
     brho35 = brho35_nominal * (1 + delta35 * 0.01)
     brho57 = brho57_nominal * (1 + delta57 * 0.01)
     AOQ35, AOQ57, beta35, beta57, _, _ = calcAOQ_from_2brho(brho35, brho57, fl35, fl57, TOF37)
-    relative_AOQ35s[i, j] = AOQ35.s / AOQ35.n * 100
-    absolute_AOQ35s[i, j] = AOQ35.s
+    relative_AOQ35_errors[i, j] = AOQ35.s / AOQ35.n * 100
+    absolute_AOQ35_errors[i, j] = AOQ35.s
 
     if F5_deg_thickness.n > 0:
         Zdeg = calc_zdeg(F5X, F5A, beta35, beta57, brho35, brho57, F5_deg_thickness, F5_deg_angle, Z)
-        Zdegs[i, j] = Zdeg.s
+        Zdeg_errors[i, j] = Zdeg.s
 
 
-heatmap = go.Heatmap(z=relative_AOQ35s, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
-contour = go.Contour(z=relative_AOQ35s, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
+heatmap = go.Heatmap(z=relative_AOQ35_errors, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
+contour = go.Contour(z=relative_AOQ35_errors, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
 fig = go.Figure(data=[heatmap, contour])
 fig.update_layout(title="Relative A/Q Resolution [%]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
 
 if F5_deg_thickness.n > 0:
-    heatmap = go.Heatmap(z=Zdegs, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
-    contour = go.Contour(z=Zdegs, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
+    heatmap = go.Heatmap(z=Zdeg_errors, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
+    contour = go.Contour(z=Zdeg_errors, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
     fig = go.Figure(data=[heatmap, contour])
     fig.update_layout(title="Absolute Zdeg Resolution", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
     st.plotly_chart(fig)
 
-heatmap = go.Heatmap(z=absolute_AOQ35s * 1000, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
-contour = go.Contour(z=absolute_AOQ35s * 1000, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
+heatmap = go.Heatmap(z=absolute_AOQ35_errors * 1000, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
+contour = go.Contour(z=absolute_AOQ35_errors * 1000, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
 fig = go.Figure(data=[heatmap, contour])
 fig.update_layout(title="Absolute A/Q Resolution [10^-3]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
