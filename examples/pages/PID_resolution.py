@@ -152,21 +152,21 @@ for i, j in np.ndindex(X.shape):
         Zdegs[i, j] = Zdeg.s
 
 
-heatmap1 = go.Heatmap(z=relative_AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
-contour1 = go.Contour(z=relative_AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
+heatmap1 = go.Heatmap(z=relative_AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7, name="")
+contour1 = go.Contour(z=relative_AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
 fig = go.Figure(data=[heatmap1, contour1])
 fig.update_layout(title="Relative A/Q Resolution [%]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
 
 if F5_deg_thickness.n > 0:
-    heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
-    contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
+    heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7, name="")
+    contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
     fig = go.Figure(data=[heatmap2, contour2])
     fig.update_layout(title="Absolute Zdeg Resolution", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
     st.plotly_chart(fig)
 
-heatmap3 = go.Heatmap(z=absolute_AOQ35s * 1000, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7)
-contour3 = go.Contour(z=absolute_AOQ35s * 1000, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines")
+heatmap3 = go.Heatmap(z=absolute_AOQ35s * 1000, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7, name="")
+contour3 = go.Contour(z=absolute_AOQ35s * 1000, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
 fig = go.Figure(data=[heatmap3, contour3])
 fig.update_layout(title="Absolute A/Q Resolution [10^-3]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
