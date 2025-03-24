@@ -113,22 +113,22 @@ if "matrixF7F5" not in st.session_state:
 matrix35 = st.session_state.matrixF3F5
 matrix75 = st.session_state.matrixF7F5
 
-PPAC_error = np.linspace(0.0, 0.8, 17)
-TOF_error = np.linspace(0, 90, 10)
-X, Y = np.meshgrid(PPAC_error, TOF_error)
-relative_AOQ35s = np.zeros_like(X)
-absolute_AOQ35s = np.zeros_like(X)
-Zdegs = np.zeros_like(X)
+position_errors = np.linspace(0.0, 0.8, 17)
+timing_errors = np.linspace(0, 90, 10)
+mesh_grid = np.meshgrid(position_errors, timing_errors)
+relative_AOQ35s = np.zeros_like(mesh_grid[0])
+absolute_AOQ35s = np.zeros_like(mesh_grid[0])
+Zdegs = np.zeros_like(mesh_grid[0])
 
 
-for i, j in np.ndindex(X.shape):
-    xval = X[i, j]
-    F3X, F5X, F7X = ufloat(0, xval), ufloat(0, xval), ufloat(0, xval)
-    F3A, F5A, F7A = ufloat(0, xval * 2), ufloat(0, xval * 2), ufloat(0, xval * 2)
+for i, j in np.ndindex(mesh_grid[0].shape):
+    position_error = mesh_grid[0][i, j]
+    F3X, F5X, F7X = ufloat(0, position_error), ufloat(0, position_error), ufloat(0, position_error)
+    F3A, F5A, F7A = ufloat(0, position_error * 2), ufloat(0, position_error * 2), ufloat(0, position_error * 2)
 
-    yval = Y[i, j]
-    timingF3 = ufloat(0, yval / 1000)
-    timingF7 = ufloat(0, yval / 1000)
+    timing_error = mesh_grid[1][i, j]
+    timingF3 = ufloat(0, timing_error / 1000)
+    timingF7 = ufloat(0, timing_error / 1000)
 
     delta35, _ = calc_delta_ai(F3X, F5X, F5A, matrix35)
     delta57, _ = calc_delta_ai(F7X, F5X, F5A, matrix75)
@@ -153,21 +153,21 @@ for i, j in np.ndindex(X.shape):
         Zdegs[i, j] = Zdeg.s
 
 
-heatmap1 = go.Heatmap(z=relative_AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7, name="")
-contour1 = go.Contour(z=relative_AOQ35s, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
-fig = go.Figure(data=[heatmap1, contour1])
+heatmap = go.Heatmap(z=relative_AOQ35s, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
+contour = go.Contour(z=relative_AOQ35s, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
+fig = go.Figure(data=[heatmap, contour])
 fig.update_layout(title="Relative A/Q Resolution [%]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
 
 if F5_deg_thickness.n > 0:
-    heatmap2 = go.Heatmap(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7, name="")
-    contour2 = go.Contour(z=Zdegs, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
-    fig = go.Figure(data=[heatmap2, contour2])
+    heatmap = go.Heatmap(z=Zdegs, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
+    contour = go.Contour(z=Zdegs, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
+    fig = go.Figure(data=[heatmap, contour])
     fig.update_layout(title="Absolute Zdeg Resolution", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
     st.plotly_chart(fig)
 
-heatmap3 = go.Heatmap(z=absolute_AOQ35s * 1000, x=PPAC_error, y=TOF_error, colorscale="Viridis", opacity=0.7, name="")
-contour3 = go.Contour(z=absolute_AOQ35s * 1000, x=PPAC_error, y=TOF_error, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
-fig = go.Figure(data=[heatmap3, contour3])
+heatmap = go.Heatmap(z=absolute_AOQ35s * 1000, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
+contour = go.Contour(z=absolute_AOQ35s * 1000, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
+fig = go.Figure(data=[heatmap, contour])
 fig.update_layout(title="Absolute A/Q Resolution [10^-3]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
