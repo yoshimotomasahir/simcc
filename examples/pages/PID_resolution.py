@@ -32,7 +32,7 @@ with col1:
     F5_deg_center = float(F5_deg.split()[1]) * 0.1  # cm
     F5_deg_angle = float(F5_deg.split()[3])  # mrad
 with col2:
-    F5_deg_error = st.number_input("Thickness Uniformity [μm]", value=10, step=1, min_value=0)  # um
+    F5_deg_error = st.number_input("Thickness Defect [μm]", value=10, step=1, min_value=0)  # um
     F5_deg_error = F5_deg_error * 0.1 * 0.001  # cm
 with col3:
     Straggling_enhancement = st.number_input("Eloss Straggling Enhancement by cc", value=1.0, step=0.1, min_value=0.0)
