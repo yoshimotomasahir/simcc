@@ -140,14 +140,14 @@ def input_projectile(comment=""):
         energy_unit = st.radio("Energy unit", ["MeV/u", "Tm"], horizontal=True)
         if use_number_input:
             if energy_unit == "MeV/u":
-                energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=250.0)
+                energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=300.0)
             elif energy_unit == "Tm":
-                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.0)
+                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.7)
         else:
             if energy_unit == "MeV/u":
-                energy = st.slider("Energy (MeV/u)", 50, 1000, 250, step=5)
+                energy = st.slider("Energy (MeV/u)", 50, 1000, 300, step=5)
             elif energy_unit == "Tm":
-                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.0)
+                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.7)
     with col1:
         if use_number_input:
             A = st.number_input("A", min_value=50, max_value=300, step=1, value=175)
