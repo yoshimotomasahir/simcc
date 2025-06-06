@@ -123,8 +123,10 @@ def get_matrix(Fa, Fb):
             return mat
 
 
-def input_projectile():
+def input_projectile(comment=""):
     st.write("**Projectile**: Configure the projectile parameters as the initial state for the calculations.")
+    if comment != "":
+        st.write(comment)
     use_number_input = st.toggle("Number input", value=True)
 
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
@@ -159,7 +161,7 @@ def input_projectile():
         if energy_unit == "MeV/u":
             st.write(f"{energy2brho(energy, A, projectile_Z-charge_state):.6f} Tm")
         else:
-            energy = brho2energy(brho, A, projectile_Z-charge_state)
+            energy = brho2energy(brho, A, projectile_Z - charge_state)
             st.write(f"{energy:.6f} MeV/u")
 
     return projectile_Z, energy, A, charge_state
