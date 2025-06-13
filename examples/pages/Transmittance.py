@@ -56,8 +56,10 @@ def find_F0_eloss(A, projectile_Z, energyD1, target_material, target_thickness, 
 # F0 charge state distribution
 elossF0a = GetAnalyticalEloss(A, projectile_Z, energyD1, target_material, target_thickness * 0.1)[0]
 elossF0 = find_F0_eloss(A, projectile_Z, energyD1, target_material, target_thickness * 0.1, elossF0a)
-MFPF0 = GetMFP(zp=projectile_Z, energy=energyD1 + elossF0 / 2, material=target_material)
-P0F0 = GetAnalyticalProb(MFPF0, target_thickness * 0.1)
+MFPF0_entrance = GetMFP(zp=projectile_Z, energy=energyD1 + elossF0, material=target_material)
+MFPF0_center = GetMFP(zp=projectile_Z, energy=energyD1 + elossF0 / 2, material=target_material)
+P0F0_initial = GetAnalyticalEqProb(MFPF0_entrance)
+P0F0 = GetAnalyticalProb(MFPF0_center, target_thickness * 0.1, charge_state=P0F0_initial)
 
 # F1 charge state distribution
 elossF1 = GetAnalyticalEloss(A, projectile_Z, energyD1, degrader1_material, degrader1_thickness * 0.1)[0]
@@ -117,7 +119,7 @@ def compute_path_P0(P0F0, P0F1s, P0F3s, P0F5s):
             for k in range(7):
                 for l in range(7):
                     prob = P0F0[i] * P0F1s[i, j] * P0F3s[j, k] * P0F5s[k, l]
-                    paths.append(((i, j, k, l), prob, [P0[i], P0F1s[i, j], P0F3s[j, k], P0F5s[k, l]]))
+                    paths.append(((i, j, k, l), prob, [P0F0[i], P0F1s[i, j], P0F3s[j, k], P0F5s[k, l]]))
 
     paths.sort(key=lambda x: x[1], reverse=True)
     return paths
