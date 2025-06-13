@@ -36,19 +36,14 @@ with col4:
     degrader2_position = st.radio("DegF5 ** PPAC2", ["before", "after"])
     st.write("PPAC x2")
 
-calculation_option = st.radio(
-    "Calculation mode:",
-    [
-        "Calculate charge state transience (excluding F0)",
-        "Assume equilibrium at the last material"
-    ]
-)
+calculation_option = st.radio("Calculation mode:", ["Calculate charge state transience (excluding F0)", "Assume equilibrium at the last material"])
 
 if calculation_option.startswith("Calculate"):
     calculation_option = "transience"
 elif calculation_option.startswith("Assume"):
     calculation_option = "equilibrium"
-else: raise ValueError("Unknown calculation option selected.")
+else:
+    raise ValueError("Unknown calculation option selected.")
 
 # D1 energy
 energyD1 = brho2energy(brhoD1, A, QD1)
@@ -89,46 +84,58 @@ for dQ in range(7):
 energyD2 = energyD1 - elossF1
 
 # F3 charge state distribution
-MFPF3PPAC = GetMFP(zp=projectile_Z, energy=energyD2, material="Mylar")
-MFPF3Pla = GetMFP(zp=projectile_Z, energy=energyD2, material="Pla")
+elossF3Pla = GetAnalyticalEloss(A, projectile_Z, energyD2, "Pla", pla3_thickness * 0.1)[0]
+elossF3PPAC1 = GetAnalyticalEloss(A, projectile_Z, energyD2 - elossF3Pla, "Mylar", 0.048 * 0.1)[0]
+elossF3PPAC2 = GetAnalyticalEloss(A, projectile_Z, energyD2 - elossF3Pla - elossF3PPAC1, "Mylar", 0.048 * 0.1)[0]
+MFPF3Pla = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla / 2, material="Pla")
+MFPF3PPAC1 = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla - elossF3PPAC1 / 2, material="Mylar")
+MFPF3PPAC2 = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla - elossF3PPAC1 - elossF3PPAC2 / 2, material="Mylar")
 P0F3s = []
 for dQ in range(7):
     if calculation_option == "transience":
         P0 = np.zeros(7)
         P0[dQ] = 1
         P0 = GetAnalyticalProb(MFPF3Pla, pla3_thickness * 0.1, charge_state=P0)
-        GetAnalyticalProb(MFPF3PPAC, (0.048 * 2) * 0.1, charge_state=P0)
+        GetAnalyticalProb(MFPF3PPAC1, 0.048 * 0.1, charge_state=P0)
+        GetAnalyticalProb(MFPF3PPAC2, 0.048 * 0.1, charge_state=P0)
     elif calculation_option == "equilibrium":
-        P0 = GetAnalyticalEqProb(MFPF3PPAC)
+        P0 = GetAnalyticalEqProb(MFPF3PPAC2)
     P0F3s.append(P0)
-elossF3Pla = GetAnalyticalEloss(A, projectile_Z, energyD2, "Pla", pla3_thickness * 0.1)[0]
-elossF3PPAC = GetAnalyticalEloss(A, projectile_Z, energyD2 - elossF3Pla, "Mylar", (0.048 * 2) * 0.1)[0]
-energyD34 = energyD2 - elossF3Pla - elossF3PPAC
+energyD34 = energyD2 - elossF3Pla - elossF3PPAC1 - elossF3PPAC2
 
 # F5 charge state distribution
-MFPF5PPAC = GetMFP(zp=projectile_Z, energy=energyD34, material="Mylar")
-MFPF5Deg = GetMFP(zp=projectile_Z, energy=energyD34, material=degrader2_material)
+elossF5PPAC1 = GetAnalyticalEloss(A, projectile_Z, energyD34, "Mylar", 0.048 * 0.1)[0]
+MFPF5PPAC1 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 / 2, material="Mylar")
+if degrader2_position == "after":
+    elossF5PPAC2 = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5PPAC1, "Mylar", 0.048 * 0.1)[0]
+    MFPF5PPAC2 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5PPAC2 / 2, material="Mylar")
+    elossF5Deg = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5PPAC1 - elossF5PPAC2, degrader2_material, degrader2_thickness * 0.1)[0]
+    MFPF5Deg = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5PPAC2 - elossF5Deg / 2, material=degrader2_material)
+else:
+    elossF5Deg = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5PPAC1, degrader2_material, degrader2_thickness * 0.1)[0]
+    MFPF5Deg = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5Deg / 2, material=degrader2_material)
+    elossF5PPAC2 = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5PPAC1 - elossF5Deg, "Mylar", 0.048 * 0.1)[0]
+    MFPF5PPAC2 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5Deg - elossF5PPAC2 / 2, material="Mylar")
 P0F5s = []
 for dQ in range(7):
     if calculation_option == "transience":
         P0 = np.zeros(7)
         P0[dQ] = 1
         if degrader2_position == "after":
-            P0 = GetAnalyticalProb(MFPF5PPAC, (0.048 * 2) * 0.1, charge_state=P0)
+            P0 = GetAnalyticalProb(MFPF5PPAC1, 0.048 * 0.1, charge_state=P0)
+            P0 = GetAnalyticalProb(MFPF5PPAC2, 0.048 * 0.1, charge_state=P0)
             P0 = GetAnalyticalProb(MFPF5Deg, degrader2_thickness * 0.1, charge_state=P0)
         else:
-            P0 = GetAnalyticalProb(MFPF5PPAC, (0.048) * 0.1, charge_state=P0)
+            P0 = GetAnalyticalProb(MFPF5PPAC1, 0.048 * 0.1, charge_state=P0)
             P0 = GetAnalyticalProb(MFPF5Deg, degrader2_thickness * 0.1, charge_state=P0)
-            P0 = GetAnalyticalProb(MFPF5PPAC, (0.048) * 0.1, charge_state=P0)
+            P0 = GetAnalyticalProb(MFPF5PPAC2, 0.048 * 0.1, charge_state=P0)
     elif calculation_option == "equilibrium":
         if degrader2_position == "after":
             P0 = GetAnalyticalEqProb(MFPF5Deg)
         else:
-            P0 = GetAnalyticalEqProb(MFPF5PPAC)
+            P0 = GetAnalyticalEqProb(MFPF5PPAC2)
     P0F5s.append(P0)
-elossF5Deg = GetAnalyticalEloss(A, projectile_Z, energyD34, degrader2_material, degrader2_thickness * 0.1)[0]
-elossF5PPAC = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5Deg, "Mylar", (0.048 * 2) * 0.1)[0]
-energyD56 = energyD34 - elossF5Deg - elossF5PPAC
+energyD56 = energyD34 - elossF5Deg - elossF5PPAC1 - elossF5PPAC2
 
 
 # Calculate combination of charge states
