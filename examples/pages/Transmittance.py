@@ -14,6 +14,8 @@ dQD1 = charge_state
 QD1 = projectile_Z - dQD1
 brhoD1 = energy2brho(energy, A, projectile_Z - charge_state)
 
+exp_correction=input_exp_correction()
+
 st.write("**Beamline components**")
 
 col1, col2, col3, col4 = st.columns(4)
@@ -64,14 +66,14 @@ def find_F0_eloss(A, projectile_Z, energyD1, target_material, target_thickness, 
 # F0 charge state distribution
 elossF0a = GetAnalyticalEloss(A, projectile_Z, energyD1, target_material, target_thickness * 0.1)[0]
 elossF0 = find_F0_eloss(A, projectile_Z, energyD1, target_material, target_thickness * 0.1, elossF0a)
-MFPF0_entrance = GetMFP(zp=projectile_Z, energy=energyD1 + elossF0, material=target_material)
-MFPF0_center = GetMFP(zp=projectile_Z, energy=energyD1 + elossF0 / 2, material=target_material)
+MFPF0_entrance = GetMFP(zp=projectile_Z, energy=energyD1 + elossF0, material=target_material, exp_correction=exp_correction)
+MFPF0_center = GetMFP(zp=projectile_Z, energy=energyD1 + elossF0 / 2, material=target_material, exp_correction=exp_correction)
 P0F0_initial = GetAnalyticalEqProb(MFPF0_entrance)
 P0F0 = GetAnalyticalProb(MFPF0_center, target_thickness * 0.1, charge_state=P0F0_initial)
 
 # F1 charge state distribution
 elossF1 = GetAnalyticalEloss(A, projectile_Z, energyD1, degrader1_material, degrader1_thickness * 0.1)[0]
-MFPF1 = GetMFP(zp=projectile_Z, energy=energyD1 - elossF1 / 2, material=degrader1_material)
+MFPF1 = GetMFP(zp=projectile_Z, energy=energyD1 - elossF1 / 2, material=degrader1_material, exp_correction=exp_correction)
 P0F1s = []
 for dQ in range(7):
     if calculation_option == "transience":
@@ -87,9 +89,9 @@ energyD2 = energyD1 - elossF1
 elossF3Pla = GetAnalyticalEloss(A, projectile_Z, energyD2, "Pla", pla3_thickness * 0.1)[0]
 elossF3PPAC1 = GetAnalyticalEloss(A, projectile_Z, energyD2 - elossF3Pla, "Mylar", 0.048 * 0.1)[0]
 elossF3PPAC2 = GetAnalyticalEloss(A, projectile_Z, energyD2 - elossF3Pla - elossF3PPAC1, "Mylar", 0.048 * 0.1)[0]
-MFPF3Pla = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla / 2, material="Pla")
-MFPF3PPAC1 = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla - elossF3PPAC1 / 2, material="Mylar")
-MFPF3PPAC2 = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla - elossF3PPAC1 - elossF3PPAC2 / 2, material="Mylar")
+MFPF3Pla = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla / 2, material="Pla", exp_correction=exp_correction)
+MFPF3PPAC1 = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla - elossF3PPAC1 / 2, material="Mylar", exp_correction=exp_correction)
+MFPF3PPAC2 = GetMFP(zp=projectile_Z, energy=energyD2 - elossF3Pla - elossF3PPAC1 - elossF3PPAC2 / 2, material="Mylar", exp_correction=exp_correction)
 P0F3s = []
 for dQ in range(7):
     if calculation_option == "transience":
@@ -105,17 +107,17 @@ energyD34 = energyD2 - elossF3Pla - elossF3PPAC1 - elossF3PPAC2
 
 # F5 charge state distribution
 elossF5PPAC1 = GetAnalyticalEloss(A, projectile_Z, energyD34, "Mylar", 0.048 * 0.1)[0]
-MFPF5PPAC1 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 / 2, material="Mylar")
+MFPF5PPAC1 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 / 2, material="Mylar", exp_correction=exp_correction)
 if degrader2_position == "after":
     elossF5PPAC2 = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5PPAC1, "Mylar", 0.048 * 0.1)[0]
-    MFPF5PPAC2 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5PPAC2 / 2, material="Mylar")
+    MFPF5PPAC2 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5PPAC2 / 2, material="Mylar", exp_correction=exp_correction)
     elossF5Deg = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5PPAC1 - elossF5PPAC2, degrader2_material, degrader2_thickness * 0.1)[0]
-    MFPF5Deg = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5PPAC2 - elossF5Deg / 2, material=degrader2_material)
+    MFPF5Deg = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5PPAC2 - elossF5Deg / 2, material=degrader2_material, exp_correction=exp_correction)
 else:
     elossF5Deg = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5PPAC1, degrader2_material, degrader2_thickness * 0.1)[0]
-    MFPF5Deg = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5Deg / 2, material=degrader2_material)
+    MFPF5Deg = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5Deg / 2, material=degrader2_material, exp_correction=exp_correction)
     elossF5PPAC2 = GetAnalyticalEloss(A, projectile_Z, energyD34 - elossF5PPAC1 - elossF5Deg, "Mylar", 0.048 * 0.1)[0]
-    MFPF5PPAC2 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5Deg - elossF5PPAC2 / 2, material="Mylar")
+    MFPF5PPAC2 = GetMFP(zp=projectile_Z, energy=energyD34 - elossF5PPAC1 - elossF5Deg - elossF5PPAC2 / 2, material="Mylar", exp_correction=exp_correction)
 P0F5s = []
 for dQ in range(7):
     if calculation_option == "transience":

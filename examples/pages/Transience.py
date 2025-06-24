@@ -18,6 +18,8 @@ st.header("Transient  state")
 
 projectile_Z, energy, A, charge_state = input_projectile()
 
+exp_correction = input_exp_correction()
+
 materials = input_materials()
 
 if st.button("Execute Calculation"):
@@ -50,7 +52,7 @@ if st.button("Execute Calculation"):
             for z_effective in z_effectives:
                 energy1 = energy0[z_effective] - GetAnalyticalEloss(A, projectile_Z, energy0[z_effective], material_name, l1 * 0.1, z_effective=z_effective)[0]
                 if z_effective == 1:
-                    MFP = GetMFP(zp=projectile_Z, energy=energy1, material=material_name)
+                    MFP = GetMFP(zp=projectile_Z, energy=energy1, material=material_name, exp_correction=exp_correction)
                     P0 = GetAnalyticalProb(MFP, (l1 - l0) * 0.1, charge_state=P0)
                     Probs.append(P0)
                 energies[z_effective].append(energy1)

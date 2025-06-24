@@ -240,6 +240,12 @@ def input_materials():
     return st.session_state.selected_materials
 
 
+def input_exp_correction():
+    cs_option = st.sidebar.selectbox("Version of charge state changing cross section", ["Original v0", "Correction v1"])
+    exp_correction = int(cs_option.split()[1].replace("v", ""))
+    return exp_correction
+
+
 def get_expanded_materials(materials):
     expanded_materials = []
     for i, material in enumerate(materials):
