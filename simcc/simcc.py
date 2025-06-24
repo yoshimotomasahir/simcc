@@ -95,7 +95,7 @@ def GetCS(zp, energy, zt, solid_gas="solid"):
         return cs
 
 
-def GetPureMFP(zp, energy, zt, solid_gas="solid", density=1):
+def GetPureMFP(zp, energy, zt, solid_gas="solid", density=1, exp_correction = 0):
     """
     Projectile (Z=zp, energy [MeV/u]) を Target (Z=zt) に入射したときの電荷変化平均自由行程を得る
     densityの単位はg/cm3で、値を正しく入れたときの平均自由行程の単位はcm
@@ -106,10 +106,17 @@ def GetPureMFP(zp, energy, zt, solid_gas="solid", density=1):
     mfp = {}
     for key, value in cs.items():
         mfp[key] = z2weight[zt] * u / (value * density) * 1e24
+    if exp_correction == 1:
+        v1, z1, v2, z2 = 0.5, 4, 0.6, 73
+        mfp[f"{zp-2}->{zp-3}"] *= v1 + (v2 - v1) * (zp - z1) / (z2 - z1)
+        v1, z1, v2, z2 = 0.6, 4, 0.7, 73
+        mfp[f"{zp-3}->{zp-4}"] *= v1 + (v2 - v1) * (zp - z1) / (z2 - z1)
+        mfp[f"{zp-4}->{zp-5}"] *= v1 + (v2 - v1) * (zp - z1) / (z2 - z1)
+        mfp[f"{zp-5}->{zp-6}"] *= v1 + (v2 - v1) * (zp - z1) / (z2 - z1)
     return mfp
 
 
-def GetMixedMFP(zp, energy, zts, m_fractions, solid_gas="solid", density=1):
+def GetMixedMFP(zp, energy, zts, m_fractions, solid_gas="solid", density=1, exp_correction = 0):
     """
     Projectile (Z=zp, energy [MeV/u]) を Target 混合物 に入射したときの電荷変化平均自由行程を得る
     混合物は Zの組と 個数比で指定する。質量比ではない
@@ -124,7 +131,7 @@ def GetMixedMFP(zp, energy, zts, m_fractions, solid_gas="solid", density=1):
         fractions.append(z2weight[zt] * m_f)
     sum_fractions = sum(fractions)
     for zt in zts:
-        MFPBuf = GetPureMFP(zp, energy, zt, solid_gas, 1)
+        MFPBuf = GetPureMFP(zp, energy, zt, solid_gas, 1, exp_correction)
         for a in MFPBuf.items():
             if a[0] not in MFPs:
                 MFPs[a[0]] = []
@@ -285,7 +292,7 @@ def GetMaterial(material, density_factor=1):
     return {"zts": zts, "m_fractions": m_fractions, "density": density * density_factor, "solid_gas": solid_gas}
 
 
-def GetMFP(zp, energy, material, density_factor=1, solid_gas=None):
+def GetMFP(zp, energy, material, *, density_factor=1, solid_gas=None, exp_correction = 0):
     """
     物質の電荷変化平均自由行程、固体かガスか、密度を得る
     solid_gas: "gas" or "solid"
@@ -293,7 +300,7 @@ def GetMFP(zp, energy, material, density_factor=1, solid_gas=None):
     """
     result = GetMaterial(material, density_factor)
     zts, m_fractions, density, solid_gas2 = result["zts"], result["m_fractions"], result["density"], result["solid_gas"]
-    return GetMixedMFP(zp, energy, zts, m_fractions, solid_gas if solid_gas2 is None else solid_gas2, density)
+    return GetMixedMFP(zp, energy, zts, m_fractions, solid_gas if solid_gas2 is None else solid_gas2, density, exp_correction)
 
 
 def GetAnalyticalEqProbFromCS(cs):
