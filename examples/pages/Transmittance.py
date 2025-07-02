@@ -183,7 +183,7 @@ dQ2label = {
 def create_path_table(path_P0):
     data = []
     for path, prob, probs in path_P0:
-        if prob < 0.01:
+        if prob < 0.001:
             break
         row = {
             "Total": f"{prob:.2%}",
