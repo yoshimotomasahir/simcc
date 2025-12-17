@@ -166,7 +166,7 @@ columns = ["D1 [Tm]", "D2 [Tm]", "D34 [Tm]", "D56 [Tm]"]
 # Energy
 data = [[eval(f"energy{col.split()[0]}") for col in columns]]
 df = pd.DataFrame(data, columns=[col.replace("Tm", "MeV/u") for col in columns])
-st.dataframe(df, use_container_width=True)
+st.dataframe(df, width="stretch")
 
 # Transmittance
 dQ2label = {
@@ -204,7 +204,7 @@ def create_path_table(path_P0):
 
 
 df_paths = create_path_table(compute_path_P0(P0F0, P0F1s, P0F3s, P0F5s))
-st.dataframe(df_paths, use_container_width=True)
+st.dataframe(df_paths, width="stretch")
 
 # Brho
 data = []
@@ -214,4 +214,4 @@ for dQ in range(7):
     data.append(row)
 index = [f"Z-q={dQ}" for dQ in range(7)]
 df = pd.DataFrame(data, index=index, columns=columns)
-st.dataframe(df, use_container_width=True)
+st.dataframe(df, width="stretch")
