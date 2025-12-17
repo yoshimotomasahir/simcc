@@ -142,12 +142,12 @@ def input_projectile(comment=""):
             if energy_unit == "MeV/u":
                 energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=300.0)
             elif energy_unit == "Tm":
-                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.7)
+                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.7, format="%.3f")
         else:
             if energy_unit == "MeV/u":
                 energy = st.slider("Energy (MeV/u)", 50, 1000, 300, step=5)
             elif energy_unit == "Tm":
-                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.7)
+                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.7, format="%.3f")
     with col1:
         if use_number_input:
             A = st.number_input("A", min_value=50, max_value=300, step=1, value=175)
@@ -202,17 +202,17 @@ def input_materials():
             expanded_materials = get_expanded_materials([material])
             st.write(", ".join(expanded_materials))
         elif material_unit == "mg/cm2":
-            thickness_mgcm3 = st.number_input("Thickness (mg/cm2)", min_value=0.0, max_value=5000.0, step=1.0, value=100.0)
+            thickness_mgcm3 = st.number_input("Thickness (mg/cm2)", min_value=0.0, max_value=10000.0, step=1.0, value=100.0)
             st.session_state.thickness = thickness_mgcm3 / density / 1000 / 0.1
         else:
             if material_unit == "μm":
-                thickness = st.number_input("Thickness (µm)", min_value=0.0, max_value=1000.0, step=10.0, value=10.0)
+                thickness = st.number_input("Thickness (µm)", min_value=0.0, max_value=10000.0, step=10.0, value=10.0)
                 st.session_state.thickness = thickness * 0.001
             elif material_unit == "mm":
-                thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=500.0, step=1.0, value=1.0)
+                thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=10000.0, step=1.0, value=1.0)
                 st.session_state.thickness = thickness * 1
             elif material_unit == "cm":
-                thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=500.0, step=1.0, value=1.0)
+                thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=10000.0, step=1.0, value=1.0)
                 st.session_state.thickness = thickness * 10
             if category == "Gas":
                 st.write(f"{density*1000 * st.session_state.thickness*0.1:.6g} mg/cm2")
