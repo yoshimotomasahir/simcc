@@ -265,14 +265,18 @@ def GetMaterial(material, density_factor=1):
             solid_gas = "solid"
             zts, m_fractions = [13], [1]
             density = 2.702
-        elif material == "Cu" or material == "Copper":
-            solid_gas = "solid"
-            zts, m_fractions = [29], [1]
-            density = 8.96
         elif material == "Fe":
             solid_gas = "solid"
             zts, m_fractions = [26], [1]
             density = 7.8658
+        elif material == "Cu" or material == "Copper":
+            solid_gas = "solid"
+            zts, m_fractions = [29], [1]
+            density = 8.96
+        elif material == "Nb":
+            solid_gas = "solid"
+            zts, m_fractions = [41], [1]
+            density = 8.57
         elif material == "Ta" or material == "Tantalum":
             solid_gas = "solid"
             zts, m_fractions = [73], [1]
