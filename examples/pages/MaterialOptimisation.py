@@ -78,7 +78,7 @@ for material in materials:
 fig = make_subplots(subplot_titles=["Charge-state probability"])
 for j in range(7):
     fig.add_trace(go.Scatter(x=materials, y=np.array(Probs).T[j].T, mode="lines", name=f"Z-Q={j}"))
-fig.update_layout(xaxis_title="Material Z")
+fig.update_layout(xaxis_title="Stripper Z")
 st.plotly_chart(fig)
 
 Elements = ["Be", "Carbon", "Al", "Cu", "Nb", "Ta"]
@@ -111,7 +111,7 @@ st.dataframe(df.round(1), width="stretch")
 
 fig = make_subplots(subplot_titles=["Equivalent thickness(x) [mg/cm2]"])
 fig.add_trace(go.Scatter(x=materials, y=np.array(Thicknesses), mode="lines"))
-fig.update_layout(xaxis_title="Material Z")
+fig.update_layout(xaxis_title="Stripper Z")
 st.plotly_chart(fig)
 
 st.success("Calculation executed successfully!")
