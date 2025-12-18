@@ -158,6 +158,7 @@ def input_projectile(comment=""):
     with col3:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
         charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), format_func=lambda x: charge_states[x])
+        st.write(f"{projectile_Z-charge_state}+")
         if energy_unit == "MeV/u":
             st.write(f"{energy2brho(energy, A, projectile_Z-charge_state):.6f} Tm")
         else:
