@@ -131,6 +131,10 @@ f"{(eloss-elossm1):.4f}<sup>*4</sup>",
 f"{(eloss-elossm1)/eloss:.3%}<sup>*5</sup>",
 ),unsafe_allow_html=True)
 
+        csv_text="dEcatima\tdEtotal\n"+"\n".join(f"{a}\t{b}" for a,b in zip(dEcatima,dEtotal))
+        with st.expander("Show raw data as TSV format",expanded=False):
+            st.code(csv_text,language="text")
+        
         total_length += length
         Ein = Ein - np.mean(dEtotal)
 
