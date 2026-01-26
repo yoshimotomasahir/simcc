@@ -15,16 +15,8 @@ st.header("PID Resolution Simulator for BigRIPS")
 st.write("Energy loss other than the F5 degrader is neglected. The resolution is the **standard deviation**.")
 st.markdown("The source code is available on [Github](https://github.com/yoshimotomasahir/simcc/blob/main/examples/pages/PID_resolution.py).")
 
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    Z = st.number_input("Atomic Number (Z)", value=50, step=1, min_value=1)
-with col2:
-    A = st.number_input("Mass Number (A)", value=132, step=1, min_value=Z)
-with col3:
-    dQ = st.number_input("Z - Charge State (Q)", value=0, step=1, max_value=4, min_value=0)
-    Q = Z - dQ
-with col4:
-    Energy = st.number_input("Energy [MeV/u] at F3", value=300, step=1, min_value=50)
+Z, Energy, A, dQ = input_projectile(comment="Energy is at F3.", initZ=50, initA=132, enableToggle = False)
+Q = Z - dQ
 
 col1, col2, col3 = st.columns(3)
 with col1:
