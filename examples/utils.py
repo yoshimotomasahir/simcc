@@ -123,47 +123,51 @@ def get_matrix(Fa, Fb):
             return mat
 
 
-def input_projectile(comment=""):
+def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEnergy = 300.0, initBrho = 6.7, enableToggle = True):
     st.write("**Projectile**: Configure the projectile parameters as the initial state for the calculations.")
     if comment != "":
         st.write(comment)
-    use_number_input = st.toggle("Number input", value=True)
+    if enableToggle:
+        use_number_input = st.toggle("Number input", value=True)
+    else:
+        use_number_input = True
 
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     with col2:
         if use_number_input:
-            projectile_Z = st.number_input("Z", min_value=30, max_value=94, step=1, value=70)
+            projectile_Z = st.number_input("Atomic Number (Z)", min_value=30, max_value=94, step=1, value=initZ)
         else:
-            projectile_Z = st.slider("Z", 30, 94, 70)
+            projectile_Z = st.slider("Atomic Number (Z)", 30, 94, initZ)
         st.write(f"Element: {z2symbol[projectile_Z]}")
     with col4:
         energy_unit = st.radio("Energy unit", ["MeV/u", "Tm"], horizontal=True)
         if use_number_input:
             if energy_unit == "MeV/u":
-                energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=300.0)
+                energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=initEnergy)
             elif energy_unit == "Tm":
-                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.7, format="%.3f")
+                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
         else:
             if energy_unit == "MeV/u":
-                energy = st.slider("Energy (MeV/u)", 50, 1000, 300, step=5)
+                energy = st.slider("Energy (MeV/u)", 50, 1000, initEnergy, step=5)
             elif energy_unit == "Tm":
-                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=6.7, format="%.3f")
+                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
     with col1:
         if use_number_input:
-            A = st.number_input("A", min_value=50, max_value=300, step=1, value=175)
+            A = st.number_input("Mass Number (A)", min_value=50, max_value=300, step=1, value=initA)
+            st.write(f"A/Z={A/projectile_Z:.4f}")
         else:
-            AoZ = st.slider("A/Z", 1.5, 3.5, 2.5, step=0.01)
+            AoZ = st.slider("A/Z", 1.5, 3.5, initAoZ, step=0.01)
             A = int(np.round(projectile_Z * AoZ))
             st.write(f"A={A}")
     with col3:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
         charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), format_func=lambda x: charge_states[x])
-        st.write(f"{projectile_Z-charge_state}+")
+        st.write(f"Q={projectile_Z-charge_state}+ A/Q={A/(projectile_Z-charge_state):.4f}")
         if energy_unit == "MeV/u":
             st.write(f"{energy2brho(energy, A, projectile_Z-charge_state):.6f} Tm")
         else:
             energy = brho2energy(brho, A, projectile_Z - charge_state)
-            st.write(f"{energy:.6f} MeV/u")
+            st.write(f"{energy:.4f} MeV/u")
 
     return projectile_Z, energy, A, charge_state
 
