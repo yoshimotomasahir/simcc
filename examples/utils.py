@@ -153,7 +153,7 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
                 brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
     with col1:
         if use_number_input:
-            mass_unit = st.radio("", ["A", "A/Z"], horizontal=True, label_visibility="collapsed")
+            mass_unit = st.radio("Mass unit", ["A", "A/Z"], horizontal=True, label_visibility="collapsed")
             if mass_unit == "A":
                 A = st.number_input("Mass Number (A)", min_value=50, max_value=300, step=1, value=initA)
                 st.write(f"A/Z={A/projectile_Z:.4f}")
