@@ -148,7 +148,7 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
                 brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
         else:
             if energy_unit == "MeV/u":
-                energy = st.slider("Energy (MeV/u)", 50, 1000, initEnergy, step=5)
+                energy = st.slider("Energy (MeV/u)", 50, 1000, int(initEnergy), step=5)
             elif energy_unit == "Tm":
                 brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
     with col1:
