@@ -22,6 +22,25 @@ projectile_Z, energy, A, charge_state = input_projectile()
 
 materials = input_materials()
 
+st.sidebar.header("Graph settings")
+
+pct = st.sidebar.radio(
+    "Plot range（±% from center）",
+    options=[5, 8, 10, 15, 20],
+    format_func=lambda x: f"±{x}%",
+    index=1,
+)
+
+items = st.sidebar.multiselect(
+    "Items to plot (select at least one)",
+    options=["col", "total", "cc"],
+    default=["total"],
+)
+if not items:
+    st.sidebar.error("Please select at least one item to plot.")
+    st.stop()
+
+
 if st.button("Execute Calculation"):
 
     expanded_materials = get_expanded_materials(materials)
@@ -44,9 +63,9 @@ if st.button("Execute Calculation"):
             histories=histories,
         )
 
-        eloss, eloss_sigma = GetAnalyticalEloss(A, projectile_Z, Ein, material_name, length*0.1)
-        elossm1, _ = GetAnalyticalEloss(A, projectile_Z-1, Ein, material_name, length*0.1)
-        N=10000
+        eloss, eloss_sigma = GetAnalyticalEloss(A, projectile_Z, Ein, material_name, length * 0.1)
+        elossm1, _ = GetAnalyticalEloss(A, projectile_Z - 1, Ein, material_name, length * 0.1)
+        N = 10000
         dEcatima = rs.normal(loc=eloss, scale=eloss_sigma, size=N)
 
         fig, axes = plt.subplots(ncols=3, figsize=(12, 4))
@@ -88,10 +107,12 @@ if st.button("Execute Calculation"):
         ax.set_title("Charge state fraction")
 
         ax = axes[2]
-        histRange = [np.mean(dEtotal) * 0.95, np.mean(dEtotal) * 1.05]
-        for param, dE in zip(["dEcatima", "dEtotal (col+cc)"], [dEcatima, dEtotal]):
-            label = f"{param}\nMean:{np.mean(dE):.3f}\nStdev:{np.std(dE):.3f} ({np.std(dE)/np.mean(dE):.2%})"
-            ax.hist(dE, alpha=0.5, bins=50, range=histRange, label=label)
+        histRange = [np.mean(dEtotal) * (1 - pct * 0.01), np.mean(dEtotal) * (1 + pct * 0.01)]
+        colors = ["tab:blue", "tab:orange", "tab:green"]
+        for l, (param, dE) in enumerate(zip(["col", "total", "cc"], [dEcatima, dEtotal, dEcc])):
+            if param in items:
+                label = f"{param}\nMean:{np.mean(dE):.3f}\nStdev:{np.std(dE):.3f} ({np.std(dE)/np.mean(dE):.2%})"
+                ax.hist(dE, alpha=0.5, bins=50, range=histRange, label=label, color=colors[l])
         ax.legend(loc="upper left", bbox_to_anchor=(0.8, 1))
         ax.set_xlabel("Energy loss [MeV/u]")
         ax.set_title("Energy loss distribution")
@@ -99,7 +120,8 @@ if st.button("Execute Calculation"):
         ax.grid(alpha=0.4)
         st.pyplot(fig)
 
-        st.markdown("""
+        st.markdown(
+            """
 |Ein [MeV/u]| |Eout|Eloss|Sigma|Zres<sup>*1</sup>|Eres<sup>*2</sup>|
 |--|--|--|--|--|--|--|
 |{}|{}|{}|{}|{}|{}|{}|
@@ -114,7 +136,7 @@ f"{eloss_sigma:.4f}",
 f"{(eloss-elossm1)/eloss_sigma:.3f}σ",
 f"{eloss_sigma/eloss:.3%}",
 
-f"<sup>{A}</sup>{z2symbol[projectile_Z]}"+(f"<sup>{projectile_Z - charge_state}+</sup>" if k==0 else "<sup>all+</sup>"),
+f"<sup>{A}</sup>{z2symbol[projectile_Z]}" + (f"<sup>{projectile_Z - charge_state}+</sup>" if k == 0 else "<sup>all+</sup>"),
 "simcc",
 f"{Ein - np.mean(dEtotal):.3f}",
 f"{np.mean(dEtotal):.3f}",
@@ -129,21 +151,25 @@ f"100{(np.mean(dEtotal))/(eloss)-1:+.3%}",
 f"{(np.std(dEtotal))/(eloss_sigma):.2f}<sup>*3</sup>",
 f"{(eloss-elossm1):.4f}<sup>*4</sup>",
 f"{(eloss-elossm1)/eloss:.3%}<sup>*5</sup>",
-),unsafe_allow_html=True)
+),
+unsafe_allow_html=True,
+)
 
-        csv_text="dEcatima\tdEtotal\n"+"\n".join(f"{a}\t{b}" for a,b in zip(dEcatima,dEtotal))
-        with st.expander("Show raw data as TSV format",expanded=False):
-            st.code(csv_text,language="text")
-        
+        csv_text = "dEcatima\tdEtotal\n" + "\n".join(f"{a}\t{b}" for a, b in zip(dEcatima, dEtotal))
+        with st.expander("Show raw data as TSV format", expanded=False):
+            st.code(csv_text, language="text")
+
         total_length += length
         Ein = Ein - np.mean(dEtotal)
 
     st.success(f"Calculation (N={N}) executed successfully!")
 
-st.html("""
+st.html(
+"""
 *1: Sigma / (Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub>)<br>
 *2: Sigma / Eloss<br>
 *3: Eloss Straggling Enhancement by cc<br>
 *4: Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub><br>
 *5: (Eloss<sub>Z</sub> - Eloss<sub>Z-1</sub>)/Eloss<sub>Z</sub><br>
-""")
+"""
+)
