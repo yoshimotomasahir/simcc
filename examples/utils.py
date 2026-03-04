@@ -123,7 +123,34 @@ def get_matrix(Fa, Fb):
             return mat
 
 
-def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEnergy = 300.0, initBrho = 6.7, enableToggle = True):
+def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEnergy = 300.0, initBrho = 6.7, enableToggle = True, use_url_params = False, initChargeState = 0):
+    if use_url_params:
+        def _query_value(key):
+            value = st.query_params.get(key)
+            if isinstance(value, list):
+                return value[0] if len(value) > 0 else None
+            return value
+
+        def _bounded_int(value, default, min_value, max_value):
+            try:
+                return max(min_value, min(max_value, int(value)))
+            except (TypeError, ValueError):
+                return default
+
+        def _bounded_float(value, default, min_value, max_value):
+            try:
+                return max(min_value, min(max_value, float(value)))
+            except (TypeError, ValueError):
+                return default
+
+        initZ = _bounded_int(_query_value("z"), initZ, 30, 94)
+        initA = _bounded_int(_query_value("a"), initA, 50, 300)
+        initAoZ = _bounded_float(_query_value("aoz"), initAoZ, 1.5, 3.6)
+        initEnergy = _bounded_float(_query_value("energy"), initEnergy, 50.0, 1000.0)
+        initBrho = _bounded_float(_query_value("brho"), initBrho, 2.0, 20.0)
+        initChargeState = _bounded_int(_query_value("charge_state"), initChargeState, 0, 6)
+        initChargeState = _bounded_int(_query_value("dq"), initChargeState, 0, 6)
+
     st.write("**Projectile**: Configure the projectile parameters as the initial state for the calculations.")
     if comment != "":
         st.write(comment)
@@ -167,7 +194,7 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
             st.write(f"A={A}")
     with col3:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
-        charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), format_func=lambda x: charge_states[x])
+        charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), index=initChargeState, format_func=lambda x: charge_states[x])
         st.write(f"Q={projectile_Z-charge_state}+ A/Q={A/(projectile_Z-charge_state):.4f}")
         if energy_unit == "MeV/u":
             st.write(f"{energy2brho(energy, A, projectile_Z-charge_state):.6f} Tm")

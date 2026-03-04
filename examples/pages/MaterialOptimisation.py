@@ -15,7 +15,7 @@ import pandas as pd
 st.set_page_config(page_title="Material Optimisation -SimCC-", page_icon="🌠")
 st.header("Material Optimisation")
 
-projectile_Z, energy, A, charge_state = input_projectile()
+projectile_Z, energy, A, charge_state = input_projectile(use_url_params=True)
 
 dE = st.number_input(
     "Energy loss dE [MeV/u]",

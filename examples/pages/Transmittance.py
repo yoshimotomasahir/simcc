@@ -9,7 +9,7 @@ st.set_page_config(page_title="Transmittance -SimCC-", page_icon="🌠")
 st.header("Transmittance due to charge state changes")
 st.write("Calculate transmittance from F0 to the F7 entrance in BigRIPS separator.")
 
-projectile_Z, energy, A, charge_state = input_projectile("Enter the charge state and energy ​​in **D1**.")
+projectile_Z, energy, A, charge_state = input_projectile("Enter the charge state and energy ​​in **D1**.", use_url_params=True)
 dQD1 = charge_state
 QD1 = projectile_Z - dQD1
 brhoD1 = energy2brho(energy, A, projectile_Z - charge_state)

@@ -15,7 +15,7 @@ st.header("PID Resolution Simulator for BigRIPS")
 st.write("Energy loss other than the F5 degrader is neglected. The resolution is the **standard deviation**.")
 st.markdown("The source code is available on [Github](https://github.com/yoshimotomasahir/simcc/blob/main/examples/pages/PID_resolution.py).")
 
-Z, Energy, A, dQ = input_projectile(comment="Energy is at F3.", initZ=50, initA=132, enableToggle = False)
+Z, Energy, A, dQ = input_projectile(comment="Energy is at F3.", initZ=50, initA=132, enableToggle = False, use_url_params=True)
 Q = Z - dQ
 
 col1, col2, col3 = st.columns(3)

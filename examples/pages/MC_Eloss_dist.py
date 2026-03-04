@@ -18,7 +18,7 @@ import matplotlib.cm as cm
 st.set_page_config(page_title="Energy loss distribution -SimCC-", page_icon="🌠")
 st.header("MC for energy loss distribution")
 
-projectile_Z, energy, A, charge_state = input_projectile()
+projectile_Z, energy, A, charge_state = input_projectile(use_url_params=True)
 
 materials = input_materials()
 
