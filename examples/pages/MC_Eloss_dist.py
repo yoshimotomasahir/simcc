@@ -34,7 +34,7 @@ pct = st.sidebar.radio(
 items = st.sidebar.multiselect(
     "Items to plot (select at least one)",
     options=["col", "total", "cc"],
-    default=["total"],
+    default=["col", "total"],
 )
 if not items:
     st.sidebar.error("Please select at least one item to plot.")
