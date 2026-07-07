@@ -139,10 +139,10 @@ def stage_transition_matrix(energy_in, materials):
     if len(materials) == 0:
         return np.eye(7), energy_out
 
-    for dQ in range(7):
+    for dq in range(7):
         energy = energy_in
         P0 = np.zeros(7)
-        P0[dQ] = 1
+        P0[dq] = 1
         for material in materials:
             material_name, length = get_material_name_length(material)
             eloss = GetAnalyticalEloss(A, projectile_Z, energy, material_name, length * 0.1, z_effective=1)[0]
@@ -155,18 +155,18 @@ def stage_transition_matrix(energy_in, materials):
 
 def compute_paths(P_D1, T_D2, T_D34, D_D56):
     paths = []
-    for dQ1 in range(7):
-        for dQ2 in range(7):
-            for dQ34 in range(7):
-                for dQ56 in range(7):
+    for dq1 in range(7):
+        for dq2 in range(7):
+            for dq34 in range(7):
+                for dq56 in range(7):
                     probs = [
-                        P_D1[dQ1],
-                        T_D2[dQ1, dQ2],
-                        T_D34[dQ2, dQ34],
-                        D_D56[dQ34, dQ56],
+                        P_D1[dq1],
+                        T_D2[dq1, dq2],
+                        T_D34[dq2, dq34],
+                        D_D56[dq34, dq56],
                     ]
                     total = np.prod(probs)
-                    paths.append(((dQ1, dQ2, dQ34, dQ56), total, probs))
+                    paths.append(((dq1, dq2, dq34, dq56), total, probs))
     paths.sort(key=lambda x: x[1], reverse=True)
     return paths
 
@@ -178,15 +178,11 @@ def create_path_table(paths):
             break
         row = {
             "Total": f"{total:.2%}",
-            "Z-Q": ",".join(map(str, path)),
-            "D1": f"Q={projectile_Z - path[0]}",
-            "p1": f"{probs[0]:.2%}",
-            "D2": f"Q={projectile_Z - path[1]}",
-            "p2": f"{probs[1]:.2%}",
-            "D34": f"Q={projectile_Z - path[2]}",
-            "p3": f"{probs[2]:.2%}",
-            "D56": f"Q={projectile_Z - path[3]}",
-            "p4": f"{probs[3]:.2%}",
+            "Z-q": ",".join(map(str, path)),
+            "p_F0": f"{probs[0]:.2%}",
+            "p_F1": f"{probs[1]:.2%}",
+            "p_F3": f"{probs[2]:.2%}",
+            "p_F5": f"{probs[3]:.2%}",
         }
         rows.append(row)
     return pd.DataFrame(rows)
@@ -217,16 +213,16 @@ st.dataframe(create_path_table(compute_paths(P_D1, T_D2, T_D34, D_D56)), width="
 st.write("**Brho** Tm")
 brho_rows = []
 energies = [energyD1, energyD2, energyD34, energyD56]
-for dQ in range(7):
-    Q = projectile_Z - dQ
+for dq in range(7):
+    q = projectile_Z - dq
     row = []
     for energy in energies:
-        ion_mass = get_ion_mass_ame20(A, projectile_Z, Q)
-        row.append(energy2brho(energy, ion_mass, Q))
+        ion_mass = get_ion_mass_ame20(A, projectile_Z, q)
+        row.append(energy2brho(energy, ion_mass, q))
     brho_rows.append(row)
 brho_df = pd.DataFrame(
     brho_rows,
-    index=[f"Z-Q={dQ}" for dQ in range(7)],
+    index=[f"Z-q={dq}" for dq in range(7)],
     columns=["D1", "D2", "D3-D4", "D5-D6"],
 )
 st.dataframe(brho_df.round(5), width="stretch")

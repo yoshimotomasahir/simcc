@@ -81,23 +81,23 @@ def beta2mom(beta, mass):
     return beta * gamma * mass * mnucleon
 
 
-def beta2brho(beta, mass, Q):
-    return beta2mom(beta, mass) / Q / clight
+def beta2brho(beta, mass, q):
+    return beta2mom(beta, mass) / q / clight
 
 
-def brho2beta(brho, mass, Q):
-    P = brho * Q * clight
+def brho2beta(brho, mass, q):
+    P = brho * q * clight
     gamma2 = 1 + (P / (mass * mnucleon)) ** 2
     beta = (1 - (1 / gamma2)) ** 0.5
     return beta
 
 
-def brho2energy(brho, mass, Q):
-    return beta2energy(brho2beta(brho, mass, Q))
+def brho2energy(brho, mass, q):
+    return beta2energy(brho2beta(brho, mass, q))
 
 
-def energy2brho(energy, mass, Q):
-    return beta2brho(energy2beta(energy), mass, Q)
+def energy2brho(energy, mass, q):
+    return beta2brho(energy2beta(energy), mass, q)
 
 
 def tof2beta(FL, TOF):
@@ -178,10 +178,10 @@ def input_projectile(comment="", projectile=None, use_url_params=False, key_pref
     with col3:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
         charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), index=initChargeState, format_func=lambda x: charge_states[x], key=_key("charge_state"))
-        Q = Z-charge_state
-        mass = get_ion_mass_ame20(A, Z, Q)
-        st.write(f"Q={Q}+")
-        st.write(f"A/Q={A/Q:.4f}")
+        q = Z-charge_state
+        mass = get_ion_mass_ame20(A, Z, q)
+        st.write(f"q={q}+")
+        st.write(f"A/q={A/q:.4f}")
     with col4:
         energy_unit = st.selectbox("Energy unit", ["MeV/u", "Tm", "Beta"], key=_key("energy_unit"))
         st.write(f"{mass:.5f} amu")
@@ -193,26 +193,26 @@ def input_projectile(comment="", projectile=None, use_url_params=False, key_pref
         elif energy_unit == "Beta":
             beta = st.number_input("Beta", min_value=0.3, max_value=0.9, step=0.02, value=0.7, format="%.3f", key=_key("beta"))
         if energy_unit == "MeV/u":
-            st.write(f"{energy2brho(energy, mass, Q):.5f} Tm")
+            st.write(f"{energy2brho(energy, mass, q):.5f} Tm")
             st.write(f"Beta: {energy2beta(energy):.7f}")
         elif energy_unit == "Tm":
-            energy = brho2energy(brho, mass, Q)
+            energy = brho2energy(brho, mass, q)
             st.write(f"{energy:.4f} MeV/u")
             st.write(f"Beta: {energy2beta(energy):.7f}")
         elif energy_unit == "Beta":
             energy = beta2energy(beta)
             st.write(f"{energy:.4f} MeV/u")
-            st.write(f"{energy2brho(energy, mass, Q):.5f} Tm")
+            st.write(f"{energy2brho(energy, mass, q):.5f} Tm")
 
 
     return {
         "Z": Z,
         "A": A,
-        "Q": Q,
+        "q": q,
         "mass": mass,
         "charge_state": charge_state,
         "energy": energy,
-        "brho": energy2brho(energy, mass, Q),
+        "brho": energy2brho(energy, mass, q),
         "beta": energy2beta(energy),
     }
 
@@ -437,25 +437,25 @@ def load_binding_energy():
         print(file_path, "is loading...")
         for row in csv.DictReader(f):
             Z = int(row["Z"])
-            Q = int(row["Q"])
-            binding_energy[(Z, Q)] = float(row["Binding Energy (eV)"]) * 1e-6
+            q = int(row["q"])
+            binding_energy[(Z, q)] = float(row["Binding Energy (eV)"]) * 1e-6
     return binding_energy
 
 
-def get_binding_energy(Z, Q):
-    if Q == Z:
+def get_binding_energy(Z, q):
+    if q == Z:
         return 0.0
     binding_energy = load_binding_energy()
-    key = (Z, Q)
+    key = (Z, q)
     if key not in binding_energy:
-        raise ValueError(f"Z={Z}, Q={Q} not found.")
+        raise ValueError(f"Z={Z}, q={q} not found.")
     return binding_energy[key]
 
 
-def get_ion_mass_ame20(A, Z, Q):
+def get_ion_mass_ame20(A, Z, q):
     N = A - Z
-    if A <= 0 or Z <= 0 or N < 0 or Q < 0 or Q > Z:
-        raise ValueError(f"Invalid nucleus: A={A}, Z={Z}, Q={Q}")
+    if A <= 0 or Z <= 0 or N < 0 or q < 0 or q > Z:
+        raise ValueError(f"Invalid nucleus: A={A}, Z={Z}, q={q}")
 
     ame20_data = load_ame20()
     key = (A, Z)
@@ -465,6 +465,6 @@ def get_ion_mass_ame20(A, Z, Q):
         mass_excess = mass_excess_semi_empirical_mev(A, Z)
     mass_amu = A + (mass_excess / mnucleon)
     binding_atom = get_binding_energy(Z, 0)
-    binding_ion = get_binding_energy(Z, Q)
+    binding_ion = get_binding_energy(Z, q)
     binding_correction_amu = (binding_atom - binding_ion) / mnucleon
-    return mass_amu - Q * emass / mnucleon + binding_correction_amu
+    return mass_amu - q * emass / mnucleon + binding_correction_amu

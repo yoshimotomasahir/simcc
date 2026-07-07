@@ -81,7 +81,7 @@ if st.button("Execute Calculation"):
 
     prob_rows = []
     for j in range(7):
-        row = {"Charge state": f"Q={projectile_Z-j}"}
+        row = {"Charge state": f"q={projectile_Z-j}"}
         for table_label, end_index in zip(table_labels, table_indices):
             row[table_label] = probs[end_index][j] * 100
         prob_rows.append(row)
@@ -89,7 +89,7 @@ if st.button("Execute Calculation"):
 
     fig = make_subplots(subplot_titles=["Energy (MeV/u) by CATIMA"])
     for z_effective in z_effectives:
-        fig.add_trace(go.Scatter(x=normalized_lengths, y=energies[z_effective], mode="lines", name=f"Q=Zeff" if z_effective == 1 else f"Q={z_effective}"))
+        fig.add_trace(go.Scatter(x=normalized_lengths, y=energies[z_effective], mode="lines", name=f"q=Zeff" if z_effective == 1 else f"q={z_effective}"))
     for j in range(n + 1):
         fig.add_vline(x=j, line_dash="dash", line_color="gray", line_width=1)
     for i in range(n):
@@ -98,14 +98,14 @@ if st.button("Execute Calculation"):
 
     energy_rows = []
     for z_effective in z_effectives:
-        label = "Q=Zeff" if z_effective == 1 else f"Q={z_effective}"
+        label = "q=Zeff" if z_effective == 1 else f"q={z_effective}"
         row = {"Charge state": f"{label}"}
         for table_label, end_index in zip(table_labels, table_indices):
             row[table_label] = energies[z_effective][end_index]
         energy_rows.append(row)
     st.dataframe(pd.DataFrame(energy_rows).set_index("Charge state").round(4), width="stretch")
 
-    header = ["Actual_length", "Normalized_length"] + ["Energy_Zeff"] + [f"Q={projectile_Z-j}" for j in range(7)]
+    header = ["Actual_length", "Normalized_length"] + ["Energy_Zeff"] + [f"q={projectile_Z-j}" for j in range(7)]
     data_rows = [
         [f"{actual_lengths[j]:.6g}"] + [f"{normalized_lengths[j]:.6g}"] + [f"{energies[1][j]:.5f}"] + [f"{p:.6e}" for p in probs[j]]
         for j in range(len(normalized_lengths))

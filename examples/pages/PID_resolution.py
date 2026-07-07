@@ -24,8 +24,8 @@ Z = projectile["Z"]
 Energy = projectile["energy"]
 A = projectile["A"]
 mass = projectile["mass"]
-dQ = projectile["charge_state"]
-Q = projectile["Q"]
+dq = projectile["charge_state"]
+q = projectile["q"]
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -58,13 +58,13 @@ def calc_fl(Xi, Ai, delta, mat, flc):
     return fl
 
 
-def calcAOQ(Brho, beta):
+def calcAOq(Brho, beta):
     gamma = 1.0 / ((1 - beta) * (1 + beta)) ** 0.5
-    AOQ = Brho * clight / mnucleon / beta / gamma
-    return AOQ
+    AOq = Brho * clight / mnucleon / beta / gamma
+    return AOq
 
 
-def calcAOQ_from_2brho(brho35, brho57, fl35, fl57, TOF37):
+def calcAOq_from_2brho(brho35, brho57, fl35, fl57, TOF37):
     a = brho57 / brho35
     b = (a**2 * clight**2 * TOF37**2 + a**2 * (a + 1) * (a - 1) * fl35**2 + (1 - a) * (1 + a) * fl57**2) ** 0.5
 
@@ -76,9 +76,9 @@ def calcAOQ_from_2brho(brho35, brho57, fl35, fl57, TOF37):
 
     gamma35 = 1.0 / ((1 - beta35) * (1 + beta35)) ** 0.5
     gamma57 = 1.0 / ((1 - beta57) * (1 + beta57)) ** 0.5
-    AOQ35 = brho35 * clight / mnucleon / beta35 / gamma35
-    AOQ57 = brho57 * clight / mnucleon / beta57 / gamma57
-    return AOQ35, AOQ57, beta35, beta57, gamma35, gamma57
+    AOq35 = brho35 * clight / mnucleon / beta35 / gamma35
+    AOq57 = brho57 * clight / mnucleon / beta57 / gamma57
+    return AOq35, AOq57, beta35, beta57, gamma35, gamma57
 
 
 def calc_zdeg(F5X, F5A, beta35, beta57, brho35, brho57, d0, angle, Z):
@@ -105,8 +105,8 @@ else:
 
 energy35_nominal = Energy
 energy57_nominal = Energy - eloss
-brho35_nominal = energy2brho(energy35_nominal, mass, Q)
-brho57_nominal = energy2brho(energy57_nominal, mass, Q)
+brho35_nominal = energy2brho(energy35_nominal, mass, q)
+brho57_nominal = energy2brho(energy57_nominal, mass, q)
 if "matrixF3F5" not in st.session_state:
     st.session_state.matrixF3F5 = get_matrix(3, 5)
 if "matrixF7F5" not in st.session_state:
@@ -117,8 +117,8 @@ matrix75 = st.session_state.matrixF7F5
 position_errors = np.linspace(0.0, 0.8, 17)
 timing_errors = np.linspace(0, 90, 10)
 mesh_grid = np.meshgrid(position_errors, timing_errors)
-relative_AOQ35_errors = np.zeros_like(mesh_grid[0])
-absolute_AOQ35_errors = np.zeros_like(mesh_grid[0])
+relative_AOq35_errors = np.zeros_like(mesh_grid[0])
+absolute_AOq35_errors = np.zeros_like(mesh_grid[0])
 Zdeg_errors = np.zeros_like(mesh_grid[0])
 
 
@@ -145,19 +145,19 @@ for i, j in np.ndindex(mesh_grid[0].shape):
 
     brho35 = brho35_nominal * (1 + delta35 * 0.01)
     brho57 = brho57_nominal * (1 + delta57 * 0.01)
-    AOQ35, AOQ57, beta35, beta57, _, _ = calcAOQ_from_2brho(brho35, brho57, fl35, fl57, TOF37)
-    relative_AOQ35_errors[i, j] = AOQ35.s / AOQ35.n * 100
-    absolute_AOQ35_errors[i, j] = AOQ35.s
+    AOq35, AOq57, beta35, beta57, _, _ = calcAOq_from_2brho(brho35, brho57, fl35, fl57, TOF37)
+    relative_AOq35_errors[i, j] = AOq35.s / AOq35.n * 100
+    absolute_AOq35_errors[i, j] = AOq35.s
 
     if F5_deg_thickness.n > 0:
         Zdeg = calc_zdeg(F5X, F5A, beta35, beta57, brho35, brho57, F5_deg_thickness, F5_deg_angle, Z)
         Zdeg_errors[i, j] = Zdeg.s
 
 
-heatmap = go.Heatmap(z=relative_AOQ35_errors, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
-contour = go.Contour(z=relative_AOQ35_errors, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
+heatmap = go.Heatmap(z=relative_AOq35_errors, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
+contour = go.Contour(z=relative_AOq35_errors, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
 fig = go.Figure(data=[heatmap, contour])
-fig.update_layout(title="Relative A/Q Resolution [%]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
+fig.update_layout(title="Relative A/q Resolution [%]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
 
 if F5_deg_thickness.n > 0:
@@ -167,8 +167,8 @@ if F5_deg_thickness.n > 0:
     fig.update_layout(title="Absolute Zdeg Resolution", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
     st.plotly_chart(fig)
 
-heatmap = go.Heatmap(z=absolute_AOQ35_errors * 1000, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
-contour = go.Contour(z=absolute_AOQ35_errors * 1000, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
+heatmap = go.Heatmap(z=absolute_AOq35_errors * 1000, x=position_errors, y=timing_errors, colorscale="Viridis", opacity=0.7, name="")
+contour = go.Contour(z=absolute_AOq35_errors * 1000, x=position_errors, y=timing_errors, colorscale="Blues", contours=dict(showlabels=True), contours_coloring="lines", name="")
 fig = go.Figure(data=[heatmap, contour])
-fig.update_layout(title="Absolute A/Q Resolution [10^-3]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
+fig.update_layout(title="Absolute A/q Resolution [10^-3]", xaxis_title="PPAC Position resolution [mm]", yaxis_title="Timing resolution [ps]", margin=dict(l=5, r=5, t=30, b=5), width=600, height=300)
 st.plotly_chart(fig)
