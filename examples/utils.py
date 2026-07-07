@@ -1,6 +1,10 @@
 import streamlit as st
 import numpy as np
 from simcc import *
+from functools import lru_cache
+
+mnucleon = 931.49410242  # // 統一原子質量単位 MeV/c^2
+emass = 0.51099895000  #   // 電子質量 MeV/c^2
 
 materialOptions = [
     "Be",
@@ -72,28 +76,28 @@ def beta2energy(beta):
     return E
 
 
-def beta2mom(beta, A):
+def beta2mom(beta, mass):
     gamma = (1 / (1 - beta * beta)) ** 0.5
-    return beta * gamma * A * mnucleon
+    return beta * gamma * mass * mnucleon
 
 
-def beta2brho(beta, A, Q):
-    return beta2mom(beta, A) / Q / clight
+def beta2brho(beta, mass, Q):
+    return beta2mom(beta, mass) / Q / clight
 
 
-def brho2beta(brho, A, Q):
+def brho2beta(brho, mass, Q):
     P = brho * Q * clight
-    gamma2 = 1 + (P / (A * mnucleon)) ** 2
+    gamma2 = 1 + (P / (mass * mnucleon)) ** 2
     beta = (1 - (1 / gamma2)) ** 0.5
     return beta
 
 
-def brho2energy(brho, A, Q):
-    return beta2energy(brho2beta(brho, A, Q))
+def brho2energy(brho, mass, Q):
+    return beta2energy(brho2beta(brho, mass, Q))
 
 
-def energy2brho(energy, A, Q):
-    return beta2brho(energy2beta(energy), A, Q)
+def energy2brho(energy, mass, Q):
+    return beta2brho(energy2beta(energy), mass, Q)
 
 
 def tof2beta(FL, TOF):
@@ -123,7 +127,7 @@ def get_matrix(Fa, Fb):
             return mat
 
 
-def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEnergy = 300.0, initBrho = 6.7, enableToggle = True, use_url_params = False, initChargeState = 0):
+def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEnergy = 300.0, initBrho = 6.7, use_url_params = False, initChargeState = 0):
     if use_url_params:
         def _query_value(key):
             value = st.query_params.get(key)
@@ -154,55 +158,46 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
     st.write("**Projectile**: Configure the projectile parameters as the initial state for the calculations.")
     if comment != "":
         st.write(comment)
-    if enableToggle:
-        use_number_input = st.toggle("Number input", value=True)
-    else:
-        use_number_input = True
 
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1.2])
     with col2:
-        if use_number_input:
-            projectile_Z = st.number_input("Atomic Number (Z)", min_value=30, max_value=94, step=1, value=initZ)
-        else:
-            projectile_Z = st.slider("Atomic Number (Z)", 30, 94, initZ)
+        projectile_Z = st.number_input("Atomic Number (Z)", min_value=30, max_value=94, step=1, value=initZ)
         st.write(f"Element: {z2symbol[projectile_Z]}")
-    with col4:
-        energy_unit = st.radio("Energy unit", ["MeV/u", "Tm"], horizontal=True)
-        if use_number_input:
-            if energy_unit == "MeV/u":
-                energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=initEnergy)
-            elif energy_unit == "Tm":
-                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
-        else:
-            if energy_unit == "MeV/u":
-                energy = st.slider("Energy (MeV/u)", 50, 1000, int(initEnergy), step=5)
-            elif energy_unit == "Tm":
-                brho = st.number_input("Energy (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
     with col1:
-        if use_number_input:
-            mass_unit = st.radio("Mass unit", ["A", "A/Z"], horizontal=True, label_visibility="collapsed")
-            if mass_unit == "A":
-                A = st.number_input("Mass Number (A)", min_value=50, max_value=300, step=1, value=initA)
-                st.write(f"A/Z={A/projectile_Z:.4f}")
-            else:
-                AoZ = st.number_input("A/Z", min_value=1.5, max_value=3.6, step=0.01, value=initAoZ)
-                A = int(np.round(projectile_Z * AoZ))
-                st.write(f"A={A}")
-        else:
-            AoZ = st.slider("A/Z", 1.5, 3.5, initAoZ, step=0.01)
-            A = int(np.round(projectile_Z * AoZ))
-            st.write(f"A={A}")
+        initA = max(initA, projectile_Z)
+        A = st.number_input("Mass Number (A)", min_value=projectile_Z, max_value=300, step=1, value=initA)
+        st.write(f"A/Z={A/projectile_Z:.4f}")
     with col3:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
         charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), index=initChargeState, format_func=lambda x: charge_states[x])
-        st.write(f"Q={projectile_Z-charge_state}+ A/Q={A/(projectile_Z-charge_state):.4f}")
+        Q = projectile_Z-charge_state
+        mass = get_ion_mass_ame20(A, projectile_Z, Q)
+        st.write(f"Q={Q}+")
+        st.write(f"A/Q={A/Q:.4f}")
+    with col4:
+        energy_unit = st.selectbox("Energy unit", ["MeV/u", "Tm", "Beta"])
+        st.write(f"{mass:.5f} amu")
+    with col5:
         if energy_unit == "MeV/u":
-            st.write(f"{energy2brho(energy, A, projectile_Z-charge_state):.6f} Tm")
-        else:
-            energy = brho2energy(brho, A, projectile_Z - charge_state)
+            energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=initEnergy)
+        elif energy_unit == "Tm":
+            brho = st.number_input("Brho (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
+        elif energy_unit == "Beta":
+            beta = st.number_input("Beta", min_value=0.3, max_value=0.9, step=0.02, value=0.7, format="%.3f")
+        if energy_unit == "MeV/u":
+            st.write(f"{energy2brho(energy, mass, Q):.5f} Tm")
+            st.write(f"Beta: {energy2beta(energy):.7f}")
+        elif energy_unit == "Tm":
+            energy = brho2energy(brho, mass, Q)
             st.write(f"{energy:.4f} MeV/u")
+            st.write(f"Beta: {energy2beta(energy):.7f}")
+        elif energy_unit == "Beta":
+            energy = beta2energy(beta)
+            st.write(f"{energy:.4f} MeV/u")
+            st.write(f"{energy2brho(energy, mass, Q):.5f} Tm")
 
-    return projectile_Z, energy, A, charge_state
+
+    return projectile_Z, energy, A, mass, charge_state
 
 
 def input_materials():
@@ -313,3 +308,102 @@ def get_material_name_length(material):
     elif material.split()[2] == "g/cm2":
         length = float(material.split()[1]) * 10
     return material_name, length
+
+
+@lru_cache(maxsize=1)
+def load_ame20():
+    ame20_data = {}
+    import os
+
+    # Download from https://www-nds.iaea.org/amdc/ame2020/mass_1.mas20.txt
+    file_path = os.path.join(os.path.dirname(__file__), "mass_1.mas20.txt")
+    with open(file_path, "r") as f:
+        print(file_path, "is loading...")
+        lines = f.readlines()[36:]
+    for line in lines:
+        if not line.strip() or line.startswith("#"):
+            continue
+        try:
+            assert line[4] == " "
+            assert line[9] == " "
+            assert line[14] == " "
+            assert line[27] == " "
+            assert line[42] == " "
+            Z = int(line[10:14])
+            N = int(line[5:9])
+            A = Z + N
+            mass_excess_keV = float(line[28:42].strip())
+            ame20_data[(A, Z)] = mass_excess_keV / 1000.0  # keV -> MeV
+        except (ValueError, AssertionError):
+            continue
+    return ame20_data
+
+
+mH_MeV = 938.78307389  # hydrogen atom mass energy, MeV
+mn_MeV = 939.56542052  # neutron mass energy, MeV
+
+
+def pairing_delta(A, Z):
+    N = A - Z
+    if A % 2 == 1:
+        return 0.0
+    if Z % 2 == 0 and N % 2 == 0:
+        return +12.0 / A**0.5
+    return -12.0 / A**0.5
+
+
+def binding_energy_semi_empirical(A, Z):
+    av, aS, aC, aA = 15.75, 17.8, 0.711, 23.7
+    return av * A - aS * A ** (2.0 / 3.0) - aC * Z * (Z - 1) / A ** (1.0 / 3.0) - aA * (A - 2 * Z) ** 2 / A + pairing_delta(A, Z)
+
+
+def mass_excess_semi_empirical_mev(A, Z):
+    N = A - Z
+    B = binding_energy_semi_empirical(A, Z)
+    atomic_mass_energy = Z * mH_MeV + N * mn_MeV - B
+    mass_excess = atomic_mass_energy - A * mnucleon
+    return mass_excess
+
+
+@lru_cache(maxsize=1)
+def load_binding_energy():
+    import csv
+    import os
+
+    file_path = os.path.join(os.path.dirname(__file__), "binding_energy.csv")
+    binding_energy = {}
+    with open(file_path, "r", encoding="utf-8", newline="") as f:
+        print(file_path, "is loading...")
+        for row in csv.DictReader(f):
+            Z = int(row["Z"])
+            Q = int(row["Q"])
+            binding_energy[(Z, Q)] = float(row["Binding Energy (eV)"]) * 1e-6
+    return binding_energy
+
+
+def get_binding_energy(Z, Q):
+    if Q == Z:
+        return 0.0
+    binding_energy = load_binding_energy()
+    key = (Z, Q)
+    if key not in binding_energy:
+        raise ValueError(f"Z={Z}, Q={Q} not found.")
+    return binding_energy[key]
+
+
+def get_ion_mass_ame20(A, Z, Q):
+    N = A - Z
+    if A <= 0 or Z <= 0 or N < 0 or Q < 0 or Q > Z:
+        raise ValueError(f"Invalid nucleus: A={A}, Z={Z}, Q={Q}")
+
+    ame20_data = load_ame20()
+    key = (A, Z)
+    if key in ame20_data:
+        mass_excess = ame20_data[key]
+    else:
+        mass_excess = mass_excess_semi_empirical_mev(A, Z)
+    mass_amu = A + (mass_excess / mnucleon)
+    binding_atom = get_binding_energy(Z, 0)
+    binding_ion = get_binding_energy(Z, Q)
+    binding_correction_amu = (binding_atom - binding_ion) / mnucleon
+    return mass_amu - Q * emass / mnucleon + binding_correction_amu

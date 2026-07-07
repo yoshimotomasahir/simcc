@@ -15,7 +15,7 @@ st.header("PID Resolution Simulator for BigRIPS")
 st.write("Energy loss other than the F5 degrader is neglected. The resolution is the **standard deviation**.")
 st.markdown("The source code is available on [Github](https://github.com/yoshimotomasahir/simcc/blob/main/examples/pages/PID_resolution.py).")
 
-Z, Energy, A, dQ = input_projectile(comment="Energy is at F3.", initZ=50, initA=132, enableToggle = False, use_url_params=True)
+Z, Energy, A, mass, dQ = input_projectile(comment="Energy is at F3.", initZ=50, initA=132, use_url_params=True)
 Q = Z - dQ
 
 col1, col2, col3 = st.columns(3)
@@ -96,8 +96,8 @@ else:
 
 energy35_nominal = Energy
 energy57_nominal = Energy - eloss
-brho35_nominal = energy2brho(energy35_nominal, A, Q)
-brho57_nominal = energy2brho(energy57_nominal, A, Q)
+brho35_nominal = energy2brho(energy35_nominal, mass, Q)
+brho57_nominal = energy2brho(energy57_nominal, mass, Q)
 if "matrixF3F5" not in st.session_state:
     st.session_state.matrixF3F5 = get_matrix(3, 5)
 if "matrixF7F5" not in st.session_state:

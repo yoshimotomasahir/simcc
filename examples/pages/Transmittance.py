@@ -9,10 +9,10 @@ st.set_page_config(page_title="Transmittance -SimCC-", page_icon="🌠")
 st.header("Transmittance due to charge state changes")
 st.write("Calculate transmittance from F0 to the F7 entrance in BigRIPS separator.")
 
-projectile_Z, energy, A, charge_state = input_projectile("Enter the charge state and energy ​​in **D1**.", use_url_params=True)
+projectile_Z, energy, A, mass, charge_state = input_projectile("Enter the charge state and energy ​​in **D1**.", use_url_params=True)
 dQD1 = charge_state
 QD1 = projectile_Z - dQD1
-brhoD1 = energy2brho(energy, A, projectile_Z - charge_state)
+brhoD1 = energy2brho(energy, mass, projectile_Z - charge_state)
 
 exp_correction=input_exp_correction()
 
@@ -48,7 +48,7 @@ else:
     raise ValueError("Unknown calculation option selected.")
 
 # D1 energy
-energyD1 = brho2energy(brhoD1, A, QD1)
+energyD1 = brho2energy(brhoD1, mass, QD1)
 
 
 def find_F0_eloss(A, projectile_Z, energyD1, target_material, target_thickness, elossF0a):
@@ -210,7 +210,7 @@ st.dataframe(df_paths, width="stretch")
 data = []
 columns = ["D1 [Tm]", "D2 [Tm]", "D34 [Tm]", "D56 [Tm]"]
 for dQ in range(7):
-    row = [eval(f"energy2brho(energy{col.split()[0]}, A, projectile_Z-dQ)") for col in columns]
+    row = [energy2brho(eval(f"energy{col.split()[0]}"), get_ion_mass_ame20(A, projectile_Z, projectile_Z - dQ), projectile_Z - dQ) for col in columns]
     data.append(row)
 index = [f"Z-q={dQ}" for dQ in range(7)]
 df = pd.DataFrame(data, index=index, columns=columns)
