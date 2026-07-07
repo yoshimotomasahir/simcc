@@ -127,7 +127,14 @@ def get_matrix(Fa, Fb):
             return mat
 
 
-def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEnergy = 300.0, initBrho = 6.7, use_url_params = False, initChargeState = 0):
+def input_projectile(comment="", projectile=None, use_url_params=False):
+    projectile = {} if projectile is None else projectile.copy()
+    initZ = projectile.get("Z", 70)
+    initA = projectile.get("A", 175)
+    initEnergy = projectile.get("energy", 300.0)
+    initBrho = projectile.get("brho", 6.7)
+    initChargeState = projectile.get("charge_state", 0)
+
     if use_url_params:
         def _query_value(key):
             value = st.query_params.get(key)
@@ -149,7 +156,6 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
 
         initZ = _bounded_int(_query_value("z"), initZ, 30, 94)
         initA = _bounded_int(_query_value("a"), initA, 50, 300)
-        initAoZ = _bounded_float(_query_value("aoz"), initAoZ, 1.5, 3.6)
         initEnergy = _bounded_float(_query_value("energy"), initEnergy, 50.0, 1000.0)
         initBrho = _bounded_float(_query_value("brho"), initBrho, 2.0, 20.0)
         initChargeState = _bounded_int(_query_value("charge_state"), initChargeState, 0, 6)
@@ -161,16 +167,16 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
 
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1.2])
     with col2:
-        projectile_Z = st.number_input("Atomic Number (Z)", min_value=30, max_value=94, step=1, value=initZ)
-        st.write(f"Element: {z2symbol[projectile_Z]}")
+        Z = st.number_input("Atomic Number (Z)", min_value=30, max_value=94, step=1, value=initZ)
+        st.write(f"Element: {z2symbol[Z]}")
     with col1:
         A = st.number_input("Mass Number (A)", min_value=50, max_value=300, step=1, value=initA)
-        st.write(f"A/Z={A/projectile_Z:.4f}")
+        st.write(f"A/Z={A/Z:.4f}")
     with col3:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
         charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), index=initChargeState, format_func=lambda x: charge_states[x])
-        Q = projectile_Z-charge_state
-        mass = get_ion_mass_ame20(A, projectile_Z, Q)
+        Q = Z-charge_state
+        mass = get_ion_mass_ame20(A, Z, Q)
         st.write(f"Q={Q}+")
         st.write(f"A/Q={A/Q:.4f}")
     with col4:
@@ -196,7 +202,16 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
             st.write(f"{energy2brho(energy, mass, Q):.5f} Tm")
 
 
-    return projectile_Z, energy, A, mass, charge_state
+    return {
+        "Z": Z,
+        "A": A,
+        "Q": Q,
+        "mass": mass,
+        "charge_state": charge_state,
+        "energy": energy,
+        "brho": energy2brho(energy, mass, Q),
+        "beta": energy2beta(energy),
+    }
 
 
 def input_materials(stages_with_materials=None, key_prefix="materials"):

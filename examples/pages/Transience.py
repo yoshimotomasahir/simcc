@@ -13,7 +13,12 @@ import pandas as pd
 st.set_page_config(page_title="Transient  state -SimCC-", page_icon="🌠")
 st.header("Transient  state")
 
-projectile_Z, energy, A, mass, charge_state = input_projectile(use_url_params=True)
+projectile = input_projectile(use_url_params=True)
+projectile_Z = projectile["Z"]
+energy = projectile["energy"]
+A = projectile["A"]
+mass = projectile["mass"]
+charge_state = projectile["charge_state"]
 
 exp_correction = input_exp_correction()
 
