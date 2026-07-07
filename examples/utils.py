@@ -127,13 +127,16 @@ def get_matrix(Fa, Fb):
             return mat
 
 
-def input_projectile(comment="", projectile=None, use_url_params=False):
+def input_projectile(comment="", projectile=None, use_url_params=False, key_prefix=None):
     projectile = {} if projectile is None else projectile.copy()
     initZ = projectile.get("Z", 70)
     initA = projectile.get("A", 175)
     initEnergy = projectile.get("energy", 300.0)
     initBrho = projectile.get("brho", 6.7)
     initChargeState = projectile.get("charge_state", 0)
+
+    def _key(name):
+        return None if key_prefix is None else f"{key_prefix}_{name}"
 
     if use_url_params:
         def _query_value(key):
@@ -167,28 +170,28 @@ def input_projectile(comment="", projectile=None, use_url_params=False):
 
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1.2])
     with col2:
-        Z = st.number_input("Atomic Number (Z)", min_value=30, max_value=94, step=1, value=initZ)
+        Z = st.number_input("Atomic Number (Z)", min_value=30, max_value=94, step=1, value=initZ, key=_key("Z"))
         st.write(f"Element: {z2symbol[Z]}")
     with col1:
-        A = st.number_input("Mass Number (A)", min_value=50, max_value=300, step=1, value=initA)
+        A = st.number_input("Mass Number (A)", min_value=50, max_value=300, step=1, value=initA, key=_key("A"))
         st.write(f"A/Z={A/Z:.4f}")
     with col3:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
-        charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), index=initChargeState, format_func=lambda x: charge_states[x])
+        charge_state = st.selectbox("Charge states", options=list(charge_states.keys()), index=initChargeState, format_func=lambda x: charge_states[x], key=_key("charge_state"))
         Q = Z-charge_state
         mass = get_ion_mass_ame20(A, Z, Q)
         st.write(f"Q={Q}+")
         st.write(f"A/Q={A/Q:.4f}")
     with col4:
-        energy_unit = st.selectbox("Energy unit", ["MeV/u", "Tm", "Beta"])
+        energy_unit = st.selectbox("Energy unit", ["MeV/u", "Tm", "Beta"], key=_key("energy_unit"))
         st.write(f"{mass:.5f} amu")
     with col5:
         if energy_unit == "MeV/u":
-            energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=initEnergy)
+            energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=initEnergy, key=_key("energy"))
         elif energy_unit == "Tm":
-            brho = st.number_input("Brho (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.4f")
+            brho = st.number_input("Brho (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.4f", key=_key("brho"))
         elif energy_unit == "Beta":
-            beta = st.number_input("Beta", min_value=0.3, max_value=0.9, step=0.02, value=0.7, format="%.3f")
+            beta = st.number_input("Beta", min_value=0.3, max_value=0.9, step=0.02, value=0.7, format="%.3f", key=_key("beta"))
         if energy_unit == "MeV/u":
             st.write(f"{energy2brho(energy, mass, Q):.5f} Tm")
             st.write(f"Beta: {energy2beta(energy):.7f}")
