@@ -164,8 +164,7 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
         projectile_Z = st.number_input("Atomic Number (Z)", min_value=30, max_value=94, step=1, value=initZ)
         st.write(f"Element: {z2symbol[projectile_Z]}")
     with col1:
-        initA = max(initA, projectile_Z)
-        A = st.number_input("Mass Number (A)", min_value=projectile_Z, max_value=300, step=1, value=initA)
+        A = st.number_input("Mass Number (A)", min_value=50, max_value=300, step=1, value=initA)
         st.write(f"A/Z={A/projectile_Z:.4f}")
     with col3:
         charge_states = {0: "Full-strip", 1: "H-like", 2: "He-like", 3: "Li-like", 4: "Be-like", 5: "B-like", 6: "C-like"}
