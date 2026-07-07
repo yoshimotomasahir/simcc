@@ -226,10 +226,17 @@ def input_materials(stages_with_materials=None, key_prefix="materials"):
     unit_key = f"{key_prefix}_material_unit"
 
     use_stages = stages_with_materials is not None
+    item_index = 0
     if use_stages:
         stages = list(stages_with_materials.keys())
         if selected_key not in st.session_state or not isinstance(st.session_state[selected_key], dict):
-            st.session_state[selected_key] = {stage: stages_with_materials.get(stage, []).copy() for stage in stages}
+            selected_materials = {}
+            for stage in stages:
+                selected_materials[stage] = []
+                for item in stages_with_materials.get(stage, []):
+                    selected_materials[stage].append(f"{item}-{item_index}")
+                    item_index += 1
+            st.session_state[selected_key] = selected_materials
         else:
             for stage in stages:
                 st.session_state[selected_key].setdefault(stage, [])
@@ -237,20 +244,11 @@ def input_materials(stages_with_materials=None, key_prefix="materials"):
     else:
         if selected_key not in st.session_state or not isinstance(st.session_state[selected_key], list):
             st.session_state[selected_key] = ["P10 gas IC-0"]
+            item_index = 1
 
     # 選択された物質のリスト (セッションステートを使用)
     if counter_key not in st.session_state:
-        if use_stages:
-            item_numbers = []
-            for selected_materials in st.session_state[selected_key].values():
-                for item in selected_materials:
-                    try:
-                        item_numbers.append(int(item.rsplit("-", 1)[1]))
-                    except (IndexError, ValueError):
-                        pass
-            st.session_state[counter_key] = max(item_numbers, default=-1) + 1
-        else:
-            st.session_state[counter_key] = 1
+        st.session_state[counter_key] = item_index
 
     # 横に並べる
     col1, col2, col3, col4, col5 = st.columns([3, 2, 1.5, 2, 1])

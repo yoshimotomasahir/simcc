@@ -15,43 +15,44 @@ samples = {
     "195-Ta(HL) 6.7618 Tm": {
         "projectile": {"Z": 73, "A": 195, "brho": 6.7618, "charge_state": 1},
         "materials": {
-            "F0": ["Be 5 mm-0"],
-            "F1": ["Al 1.4 mm-1"],
-            "F3": ["Plastic 0.1 mm-2", "PPAC-3", "PPAC-4"],
-            "F5": ["PPAC-5", "Al 1 mm-6", "PPAC-7"],
+            "F0": ["Be 5 mm"],
+            "F1": ["Al 1.4 mm"],
+            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
+            "F5": ["PPAC", "PPAC", "Al 1 mm"],
         },
     },
     "184-Tm(HL) 6.7618 Tm": {
         "projectile": {"Z": 69, "A": 184, "brho": 6.7618, "charge_state": 1},
         "materials": {
-            "F0": ["Be 5 mm-0"],
-            "F1": ["Al 1.4 mm-1"],
-            "F3": ["Plastic 0.1 mm-2", "PPAC-3", "PPAC-4", "Al 0.2 mm-5"],
-            "F5": ["PPAC-6", "Al 1 mm-7", "PPAC-8"],
+            "F0": ["Be 5 mm"],
+            "F1": ["Al 1.4 mm"],
+            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC", "Al 0.2 mm"],
+            "F5": ["PPAC", "PPAC", "Al 1 mm"],
         },
     },
     "151-Hf(HL) 5.7146 Tm": {
         "projectile": {"Z": 72, "A": 151, "brho": 5.7146, "charge_state": 1},
         "materials": {
-            "F0": ["Be 2 mm-0"],
-            "F1": ["Ta 0.01 mm-1"],
-            "F3": ["Plastic 0.1 mm-2", "PPAC-3", "PPAC-4"],
-            "F5": ["PPAC-5", "Al 2 mm-6", "PPAC-7"],
+            "F0": ["Be 2 mm"],
+            "F1": ["Ta 0.01 mm"],
+            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
+            "F5": ["PPAC", "Al 2 mm", "PPAC"],
         },
     },
     "116-La(FS) 5.2088 Tm": {
         "projectile": {"Z": 57, "A": 116, "brho": 5.2088, "charge_state": 0},
         "materials": {
-            "F0": ["Be 3 mm-0"],
-            "F1": ["Al 1.4 mm-1"],
-            "F3": ["Plastic 0.1 mm-2", "PPAC-3", "PPAC-4"],
-            "F5": ["PPAC-5", "Al 1.5 mm-6", "PPAC-7"],
+            "F0": ["Be 3 mm"],
+            "F1": ["Al 1.4 mm"],
+            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
+            "F5": ["PPAC", "Al 1.5 mm", "PPAC"],
         },
     },
 }
 
 sample_name = st.sidebar.selectbox("Sample setup", list(samples.keys()), key="transmittance_sample")
 sample = samples[sample_name]
+
 
 if st.session_state.get("transmittance_loaded_sample") != sample_name:
     sample_projectile = sample["projectile"]
@@ -60,15 +61,8 @@ if st.session_state.get("transmittance_loaded_sample") != sample_name:
     st.session_state["transmittance_projectile_charge_state"] = sample_projectile["charge_state"]
     st.session_state["transmittance_projectile_energy_unit"] = "Tm"
     st.session_state["transmittance_projectile_brho"] = sample_projectile["brho"]
-    st.session_state["transmittance_selected_materials"] = {stage: materials.copy() for stage, materials in sample["materials"].items()}
-    item_numbers = []
-    for materials in st.session_state["transmittance_selected_materials"].values():
-        for item in materials:
-            try:
-                item_numbers.append(int(item.rsplit("-", 1)[1]))
-            except (IndexError, ValueError):
-                pass
-    st.session_state["transmittance_j"] = max(item_numbers, default=-1) + 1
+    st.session_state.pop("transmittance_selected_materials", None)
+    st.session_state.pop("transmittance_j", None)
     st.session_state["transmittance_loaded_sample"] = sample_name
 
 projectile = input_projectile(
@@ -88,17 +82,6 @@ materials_by_stage = input_materials(
     stages_with_materials=sample["materials"],
     key_prefix="transmittance",
 )
-
-calculation_option = st.radio(
-    "Calculation mode:",
-    ["Calculate charge state transience at F1, F3 and F5", "Assume equilibrium at the last material"],
-)
-if calculation_option.startswith("Calculate"):
-    calculation_option = "transience"
-elif calculation_option.startswith("Assume"):
-    calculation_option = "equilibrium"
-else:
-    raise ValueError("Unknown calculation option selected.")
 
 def expanded_stage_materials(stage):
     return get_expanded_materials(materials_by_stage.get(stage, []))
@@ -149,16 +132,12 @@ def stage_energy_in(energy_out, materials):
     return energy
 
 
-def stage_transition_matrix(energy_in, materials, mode):
+def stage_transition_matrix(energy_in, materials):
     matrix = []
     energy_out = stage_energy_out(energy_in, materials)
 
     if len(materials) == 0:
         return np.eye(7), energy_out
-
-    if mode == "equilibrium":
-        P_eq = equilibrium_probability(get_material_name_length(materials[-1])[0], energy_out)
-        return np.array([P_eq.copy() for _ in range(7)]), energy_out
 
     for dQ in range(7):
         energy = energy_in
@@ -221,9 +200,9 @@ F5_materials = expanded_stage_materials("F5")
 energyInitial = stage_energy_in(energyD1, F0_materials)
 P_D1 = equilibrium_probability(last_material_name(materials_by_stage["F0"]), energyD1)
 
-T_D2, energyD2 = stage_transition_matrix(energyD1, F1_materials, calculation_option)
-T_D34, energyD34 = stage_transition_matrix(energyD2, F3_materials, calculation_option)
-D_D56, energyD56 = stage_transition_matrix(energyD34, F5_materials, calculation_option)
+T_D2, energyD2 = stage_transition_matrix(energyD1, F1_materials)
+T_D34, energyD34 = stage_transition_matrix(energyD2, F3_materials)
+D_D56, energyD56 = stage_transition_matrix(energyD34, F5_materials)
 
 st.write("**Energy** [MeV/u]")
 energy_df = pd.DataFrame(
