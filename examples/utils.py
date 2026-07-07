@@ -199,79 +199,113 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
     return projectile_Z, energy, A, mass, charge_state
 
 
-def input_materials():
+def input_materials(stages=None, key_prefix="materials"):
     st.write("**Material Setting**: Select and configure materials. Press 'Add' to append them to the material list.")
 
+    selected_key = f"{key_prefix}_selected_materials"
+    counter_key = f"{key_prefix}_j"
+    thickness_key = f"{key_prefix}_thickness"
+    unit_key = f"{key_prefix}_material_unit"
+
+    use_stages = stages is not None
+    if use_stages:
+        stages = list(stages)
+        if selected_key not in st.session_state or not isinstance(st.session_state[selected_key], dict):
+            st.session_state[selected_key] = {stage: [] for stage in stages}
+        else:
+            for stage in stages:
+                st.session_state[selected_key].setdefault(stage, [])
+        stage = st.radio("Position", stages, key=f"{key_prefix}_stage", horizontal=True)
+    else:
+        if selected_key not in st.session_state or not isinstance(st.session_state[selected_key], list):
+            st.session_state[selected_key] = ["P10 gas IC-0"]
 
     # 選択された物質のリスト (セッションステートを使用)
-    if "selected_materials" not in st.session_state:
-        st.session_state.selected_materials = ["P10 gas IC-0"]
-    if "j" not in st.session_state:
-        st.session_state.j = 1
+    if counter_key not in st.session_state:
+        st.session_state[counter_key] = 1
 
     # 横に並べる
     col1, col2, col3, col4, col5 = st.columns([3, 2, 1.5, 2, 1])
 
     with col1:
-        category = st.selectbox("Category", list(material_list.keys()))
+        category = st.selectbox("Category", list(material_list.keys()), key=f"{key_prefix}_category")
 
     with col2:
-        material = st.selectbox("Material", material_list[category])
+        material = st.selectbox("Material", material_list[category], key=f"{key_prefix}_material")
         if category != "Gas detectors":
             density = GetMaterial(material)["density"]
             if category == "Gas":
                 st.write(f"{density*1000:.6g} mg/cm3")
             elif category == "Single substance":
-                st.write(f"Element: {z2symbol[int(material.replace("Z=", ""))]} ({density:.6g} g/cm3)")
+                st.write(f"Element: {z2symbol[int(material.replace('Z=', ''))]} ({density:.6g} g/cm3)")
             elif category != "Gas detectors":
                 st.write(f"{density:.6g} g/cm3")
 
     with col3:
         material_units = ["mm", "μm", "cm", "mg/cm2"]
-        material_unit = st.radio("Unit", material_units, key=f"material_unit")
+        material_unit = st.radio("Unit", material_units, key=unit_key)
 
     with col4:
         if category == "Gas detectors":
-            thickness = st.number_input("Thickness (N/A)", disabled=True)  # 入力不可
+            st.number_input("Thickness (N/A)", disabled=True, key=f"{key_prefix}_thickness_na")  # 入力不可
             expanded_materials = get_expanded_materials([material])
             st.write(", ".join(expanded_materials))
         elif material_unit == "mg/cm2":
-            thickness_mgcm3 = st.number_input("Thickness (mg/cm2)", min_value=0.0, max_value=10000.0, step=1.0, value=100.0)
-            st.session_state.thickness = thickness_mgcm3 / density / 1000 / 0.1
+            thickness_mgcm3 = st.number_input("Thickness (mg/cm2)", min_value=0.0, max_value=10000.0, step=1.0, value=100.0, key=f"{key_prefix}_thickness_mgcm2")
+            st.session_state[thickness_key] = thickness_mgcm3 / density / 1000 / 0.1
         else:
             if material_unit == "μm":
-                thickness = st.number_input("Thickness (µm)", min_value=0.0, max_value=10000.0, step=10.0, value=10.0)
-                st.session_state.thickness = thickness * 0.001
+                thickness = st.number_input("Thickness (µm)", min_value=0.0, max_value=10000.0, step=10.0, value=10.0, key=f"{key_prefix}_thickness_um")
+                st.session_state[thickness_key] = thickness * 0.001
             elif material_unit == "mm":
-                thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=10000.0, step=1.0, value=1.0)
-                st.session_state.thickness = thickness * 1
+                thickness = st.number_input("Thickness (mm)", min_value=0.1, max_value=10000.0, step=1.0, value=1.0, key=f"{key_prefix}_thickness_mm")
+                st.session_state[thickness_key] = thickness
             elif material_unit == "cm":
-                thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=10000.0, step=1.0, value=1.0)
-                st.session_state.thickness = thickness * 10
+                thickness = st.number_input("Thickness (cm)", min_value=0.1, max_value=10000.0, step=1.0, value=1.0, key=f"{key_prefix}_thickness_cm")
+                st.session_state[thickness_key] = thickness * 10
             if category == "Gas":
-                st.write(f"{density*1000 * st.session_state.thickness*0.1:.6g} mg/cm2")
+                st.write(f"{density*1000 * st.session_state[thickness_key]*0.1:.6g} mg/cm2")
             else:
-                st.write(f"{density * st.session_state.thickness*0.1:.6g} g/cm2")
+                st.write(f"{density * st.session_state[thickness_key]*0.1:.6g} g/cm2")
 
     with col5:
-        if st.button("Add"):
+        if st.button("Add", key=f"{key_prefix}_add"):
             if category == "Gas detectors":
                 item = f"{material}"
             elif category == "Single substance":
-                item = f"{material} {density * st.session_state.thickness * 0.1:.6g} g/cm2"
+                item = f"{material} {density * st.session_state[thickness_key] * 0.1:.6g} g/cm2"
             else:
-                item = f"{material} {st.session_state.thickness:.6g} mm"
-            st.session_state.selected_materials.append(f"{item}-{st.session_state.j}")
-            st.session_state.j += 1
+                item = f"{material} {st.session_state[thickness_key]:.6g} mm"
+            numbered_item = f"{item}-{st.session_state[counter_key]}"
+            if use_stages:
+                st.session_state[selected_key][stage].append(numbered_item)
+            else:
+                st.session_state[selected_key].append(numbered_item)
+            st.session_state[counter_key] += 1
 
     st.write("**Material List**: These are used in the calculations. Uncheck to remove.")
 
-    for i, item in enumerate(st.session_state.selected_materials):
-        checked = st.checkbox(item.split("-")[0], value=True, key=item)
-        if checked == False:
-            st.session_state.selected_materials.pop(i)
-            st.rerun()
-    return st.session_state.selected_materials
+    if use_stages:
+        stage_cols = st.columns(len(stages))
+        for stage_col, stage in zip(stage_cols, stages):
+            with stage_col:
+                st.write(f"**{stage}**")
+                selected_materials = st.session_state[selected_key][stage]
+                if len(selected_materials) == 0:
+                    st.caption("No materials")
+                for item in selected_materials.copy():
+                    checked = st.checkbox(item.split("-")[0], value=True, key=f"{key_prefix}_{stage}_{item}")
+                    if checked == False:
+                        st.session_state[selected_key][stage].remove(item)
+                        st.rerun()
+        return st.session_state[selected_key]
+    else:
+        for item in st.session_state[selected_key].copy():
+            checked = st.checkbox(item.split("-")[0], value=True, key=f"{key_prefix}_{item}")
+            if checked == False:
+                st.session_state[selected_key].remove(item)
+                st.rerun()
+        return st.session_state[selected_key]
 
 
 def input_exp_correction():
