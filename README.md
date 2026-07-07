@@ -50,6 +50,9 @@ Follow these steps to install SimCC:
     ```sh
     pip install .
     ```
+6. Update package:
+    Remove `build` and `simcc.egg-info` directories and re-install.
+
 ## Usage
 
 Example files for Jupyter and Streamlit are available in the examples directory.
