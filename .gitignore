@@ -22,3 +22,4 @@ MANIFEST
 __pycache__/
 
 test.ipynb
+.ipynb_checkpoints
