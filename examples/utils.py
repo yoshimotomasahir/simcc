@@ -180,7 +180,7 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
         if energy_unit == "MeV/u":
             energy = st.number_input("Energy (MeV/u)", min_value=50.0, max_value=1000.0, step=5.0, value=initEnergy)
         elif energy_unit == "Tm":
-            brho = st.number_input("Brho (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.3f")
+            brho = st.number_input("Brho (Tm)", min_value=2.0, max_value=20.0, step=0.1, value=initBrho, format="%.4f")
         elif energy_unit == "Beta":
             beta = st.number_input("Beta", min_value=0.3, max_value=0.9, step=0.02, value=0.7, format="%.3f")
         if energy_unit == "MeV/u":
@@ -199,7 +199,7 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
     return projectile_Z, energy, A, mass, charge_state
 
 
-def input_materials(stages=None, key_prefix="materials"):
+def input_materials(stages_with_materials=None, key_prefix="materials"):
     st.write("**Material Setting**: Select and configure materials. Press 'Add' to append them to the material list.")
 
     selected_key = f"{key_prefix}_selected_materials"
@@ -207,11 +207,11 @@ def input_materials(stages=None, key_prefix="materials"):
     thickness_key = f"{key_prefix}_thickness"
     unit_key = f"{key_prefix}_material_unit"
 
-    use_stages = stages is not None
+    use_stages = stages_with_materials is not None
     if use_stages:
-        stages = list(stages)
+        stages = list(stages_with_materials.keys())
         if selected_key not in st.session_state or not isinstance(st.session_state[selected_key], dict):
-            st.session_state[selected_key] = {stage: [] for stage in stages}
+            st.session_state[selected_key] = {stage: stages_with_materials.get(stage, []).copy() for stage in stages}
         else:
             for stage in stages:
                 st.session_state[selected_key].setdefault(stage, [])
@@ -222,7 +222,17 @@ def input_materials(stages=None, key_prefix="materials"):
 
     # 選択された物質のリスト (セッションステートを使用)
     if counter_key not in st.session_state:
-        st.session_state[counter_key] = 1
+        if use_stages:
+            item_numbers = []
+            for selected_materials in st.session_state[selected_key].values():
+                for item in selected_materials:
+                    try:
+                        item_numbers.append(int(item.rsplit("-", 1)[1]))
+                    except (IndexError, ValueError):
+                        pass
+            st.session_state[counter_key] = max(item_numbers, default=-1) + 1
+        else:
+            st.session_state[counter_key] = 1
 
     # 横に並べる
     col1, col2, col3, col4, col5 = st.columns([3, 2, 1.5, 2, 1])
