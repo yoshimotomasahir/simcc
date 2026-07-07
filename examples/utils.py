@@ -202,8 +202,6 @@ def input_projectile(comment="", initZ = 70, initA = 175, initAoZ = 2.5, initEne
 def input_materials():
     st.write("**Material Setting**: Select and configure materials. Press 'Add' to append them to the material list.")
 
-    material_units = ["mm", "μm", "cm", "mg/cm2"]
-    material_unit = st.radio("Unit", material_units, key=f"material_unit", horizontal=True)
 
     # 選択された物質のリスト (セッションステートを使用)
     if "selected_materials" not in st.session_state:
@@ -212,7 +210,7 @@ def input_materials():
         st.session_state.j = 1
 
     # 横に並べる
-    col1, col2, col3, col4 = st.columns([3, 2, 2, 1])
+    col1, col2, col3, col4, col5 = st.columns([3, 2, 1.5, 2, 1])
 
     with col1:
         category = st.selectbox("Category", list(material_list.keys()))
@@ -229,6 +227,10 @@ def input_materials():
                 st.write(f"{density:.6g} g/cm3")
 
     with col3:
+        material_units = ["mm", "μm", "cm", "mg/cm2"]
+        material_unit = st.radio("Unit", material_units, key=f"material_unit")
+
+    with col4:
         if category == "Gas detectors":
             thickness = st.number_input("Thickness (N/A)", disabled=True)  # 入力不可
             expanded_materials = get_expanded_materials([material])
@@ -251,7 +253,7 @@ def input_materials():
             else:
                 st.write(f"{density * st.session_state.thickness*0.1:.6g} g/cm2")
 
-    with col4:
+    with col5:
         if st.button("Add"):
             if category == "Gas detectors":
                 item = f"{material}"
