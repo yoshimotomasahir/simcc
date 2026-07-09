@@ -114,6 +114,30 @@ def create_path_table(paths):
     return pd.DataFrame(rows)
 
 
+def calculate_stage_energies(projectile, materials_by_stage):
+    projectile_z = projectile["Z"]
+    energy_d1 = projectile["energy"]
+    a = projectile["A"]
+
+    f0_materials = expand_stage_materials(materials_by_stage, "F0")
+    f1_materials = expand_stage_materials(materials_by_stage, "F1")
+    f3_materials = expand_stage_materials(materials_by_stage, "F3")
+    f5_materials = expand_stage_materials(materials_by_stage, "F5")
+
+    energy_initial = stage_energy_in(a, projectile_z, energy_d1, f0_materials)
+    energy_d2 = stage_energy_out(a, projectile_z, energy_d1, f1_materials)
+    energy_d34 = stage_energy_out(a, projectile_z, energy_d2, f3_materials)
+    energy_d56 = stage_energy_out(a, projectile_z, energy_d34, f5_materials)
+
+    return {
+        "Initial": energy_initial,
+        "D1": energy_d1,
+        "D2": energy_d2,
+        "D3-D4": energy_d34,
+        "D5-D6": energy_d56,
+    }
+
+
 def calculate_transmittance(projectile, materials_by_stage, exp_correction):
     projectile_z = projectile["Z"]
     energy_d1 = projectile["energy"]
@@ -125,7 +149,7 @@ def calculate_transmittance(projectile, materials_by_stage, exp_correction):
     f3_materials = expand_stage_materials(materials_by_stage, "F3")
     f5_materials = expand_stage_materials(materials_by_stage, "F5")
 
-    energy_initial = stage_energy_in(a, projectile_z, energy_d1, f0_materials)
+    energies = calculate_stage_energies(projectile, materials_by_stage)
     p_d1 = equilibrium_probability(
         projectile_z,
         charge_state,
@@ -140,13 +164,7 @@ def calculate_transmittance(projectile, materials_by_stage, exp_correction):
     paths = compute_paths(p_d1, t_d2, t_d34, d_d56)
 
     return {
-        "energies": {
-            "Initial": energy_initial,
-            "D1": energy_d1,
-            "D2": energy_d2,
-            "D3-D4": energy_d34,
-            "D5-D6": energy_d56,
-        },
+        "energies": energies,
         "paths": paths,
         "stage_materials": {
             "F0": f0_materials,
