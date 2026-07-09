@@ -224,15 +224,15 @@ def GetMaterial(material, density_factor=1):
         solid_gas = "solid"
         density = 3.4
         # zts, m_fractions = [1, 6, 7, 8, 16, 35, 47, 53], [1.597317, 0.767649, 0.219181, 0.529395, 0.000936, 0.404110, 0.411614, 0.007407]
-        zts = [1, 6, 7, 8, 16, 35, 47, 53], 
-        m_fractions = [1.597317 / 0.000936, 0.767649 / 0.000936, 0.219181 / 0.000936, 0.529395 / 0.000936, 1, 0.404110 / 0.000936, 0.411614 / 0.000936, 0.007407 / 0.000936]
+        zts = [1, 6, 7, 8, 16, 35, 47, 53]
+        m_fractions = [38.56, 21.10, 6.10, 11.17, 11.34, 11.53, 0.20]
 
     else:
         ZTarget = None
         if material == "GasHe":
             solid_gas = "gas"
             zts, m_fractions = [2], [1]
-            density = 0.001 * 0.179
+            density = 0.001 * 0.166
         elif material == "GasNe":
             solid_gas = "gas"
             zts, m_fractions = [10], [1]
@@ -265,6 +265,10 @@ def GetMaterial(material, density_factor=1):
             solid_gas = "solid"
             zts, m_fractions = [13], [1]
             density = 2.702
+        elif material == "Ti":
+            solid_gas = "solid"
+            zts, m_fractions = [22], [1]
+            density = 4.506
         elif material == "Fe":
             solid_gas = "solid"
             zts, m_fractions = [26], [1]
