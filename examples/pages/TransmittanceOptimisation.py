@@ -85,23 +85,23 @@ elements = ["Carbon", "Al", "Ti", "Cu", "Nb", "Ta"]
 thickness_rows = []
 
 for element in elements:
-    thickness = get_thickness(a, projectile_z, stripper_energy_in, dE, element)
+    thickness_cm = get_thickness(a, projectile_z, stripper_energy_in, dE, element)
     result = GetMaterial(element)
     zts, density = result["zts"], result["density"]
     thickness_rows.append(
         {
             "Stripper": element,
             "Z": zts[0],
-            "Thickness [um]": thickness / density * 10000 if np.isfinite(thickness) else np.nan,
-            "x [mg/cm2]": thickness * 1000 if np.isfinite(thickness) else np.nan,
+            "Thickness [um]": thickness_cm * 10000 if np.isfinite(thickness_cm) else np.nan,
+            "x [mg/cm2]": thickness_cm * density * 1000 if np.isfinite(thickness_cm) else np.nan,
             "rho [mg/cm3]": density * 1000,
-            "thickness_g_cm2": thickness,
+            "thickness_cm": thickness_cm,
         }
     )
 
 thickness_df = pd.DataFrame(thickness_rows)
 st.write("**Equivalent thickness for the energy loss**")
-st.dataframe(thickness_df.drop(columns=["thickness_g_cm2"]).round(3), width="stretch")
+st.dataframe(thickness_df.drop(columns=["thickness_cm"]).round(3), width="stretch")
 
 
 def create_fixed_path_table(paths, target_paths):
@@ -133,15 +133,15 @@ if st.button("Calculate transmittance change"):
 
     for thickness_row in thickness_rows:
         element = thickness_row["Stripper"]
-        thickness = thickness_row["thickness_g_cm2"]
+        thickness_cm = thickness_row["thickness_cm"]
 
-        if not np.isfinite(thickness):
+        if not np.isfinite(thickness_cm):
             for path in change_by_path:
                 change_by_path[path].append(np.nan)
             trial_top_path_tables.append(pd.DataFrame([{"Stripper": element}]))
             continue
 
-        added_material = f"{element} {thickness:.6g} g/cm2"
+        added_material = f"{element} {thickness_cm*10:.6g} mm"
         trial_materials_by_stage = {key: value.copy() for key, value in materials_by_stage.items()}
         trial_materials_by_stage[stage].append(added_material)
         trial = calculate_transmittance(projectile, trial_materials_by_stage, exp_correction)
