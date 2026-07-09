@@ -27,7 +27,7 @@ materialOptions = [
 material_list = {
     "Gas detectors": ["P10 gas IC", "Xe gas IC", "PPAC"],
     "Gas": ["P10", "Xe7", "iC4H10", "CH4", "GasHe", "GasNe", "GasAr", "GasKr", "GasXe"],
-    "Strippers": ["Al", "Ta", "W", "Pt", "Au"],
+    "Strippers": ["Al", "Ti", "Cu", "Nb", "Ta"],
     "Degraders": ["Al", "Cu", "Acrylic"],
     "Targets": ["Be", "W", "Carbon"],
     "Others": ["Plastic", "Diamond", "Kapton", "Mylar", "EmulsionE07"],
