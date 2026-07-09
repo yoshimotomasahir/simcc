@@ -49,7 +49,7 @@ st.write("**Candidate stripper**")
 stage = st.radio("Stripper insert position", ["F1", "F3", "F5"], index=1, horizontal=True)
 dE = st.number_input(
     "Energy loss in the stripper [MeV/u]",
-    value=1.0,
+    value=2.0,
     min_value=0.0,
     format="%.3f",
 )
@@ -104,7 +104,7 @@ st.write("**Equivalent thickness for the energy loss**")
 st.dataframe(thickness_df.drop(columns=["thickness_cm"]).round(3), width="stretch")
 
 
-def create_fixed_path_table(paths, target_paths):
+def create_fixed_path_table(paths, target_paths, energy_d56):
     path_map = {path: (total, probs) for path, total, probs in paths}
     rows = []
     for path in target_paths:
@@ -117,6 +117,7 @@ def create_fixed_path_table(paths, target_paths):
                 "p_F1": f"{probs[1]:.2%}",
                 "p_F3": f"{probs[2]:.2%}",
                 "p_F5": f"{probs[3]:.2%}",
+                "D5-D6 [MeV/u]": energy_d56,
             }
         )
     return pd.DataFrame(rows)
@@ -127,7 +128,7 @@ if st.button("Calculate transmittance change"):
     target_paths = [path for path, _, _ in baseline_top_paths]
 
     change_by_path = {path: [] for path, _, _ in baseline_top_paths}
-    baseline_top_path_table = create_fixed_path_table(baseline["paths"], target_paths)
+    baseline_top_path_table = create_fixed_path_table(baseline["paths"], target_paths, baseline["energies"]["D5-D6"])
     baseline_top_path_table.insert(0, "Stripper", "None")
     trial_top_path_tables = [baseline_top_path_table]
 
@@ -146,7 +147,7 @@ if st.button("Calculate transmittance change"):
         trial_materials_by_stage[stage].append(added_material)
         trial = calculate_transmittance(projectile, trial_materials_by_stage, exp_correction)
         trial_totals = {path: total for path, total, _ in trial["paths"]}
-        trial_top_path_table = create_fixed_path_table(trial["paths"], target_paths)
+        trial_top_path_table = create_fixed_path_table(trial["paths"], target_paths, trial["energies"]["D5-D6"])
         trial_top_path_table.insert(0, "Stripper", element)
         trial_top_path_tables.append(trial_top_path_table)
 
@@ -173,4 +174,4 @@ if st.button("Calculate transmittance change"):
     st.plotly_chart(fig, width="stretch")
 
     st.write("**Top 5 charge-state paths**")
-    st.dataframe(pd.concat(trial_top_path_tables, ignore_index=True), width="stretch")
+    st.dataframe(pd.concat(trial_top_path_tables, ignore_index=True).round(4), width="stretch")
