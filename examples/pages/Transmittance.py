@@ -11,63 +11,24 @@ st.set_page_config(page_title="Transmittance -SimCC-", page_icon="🌠")
 st.header("Transmittance due to charge state changes")
 st.write("Calculate transmittance through user-defined materials at F0, F1, F3, and F5.")
 
-samples = {
-    "195-Ta(HL) 6.7618 Tm": {
-        "projectile": {"Z": 73, "A": 195, "brho": 6.7618, "charge_state": 1},
-        "materials": {
-            "F0": ["Be 5 mm"],
-            "F1": ["Al 1.4 mm"],
-            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
-            "F5": ["PPAC", "PPAC", "Al 1 mm"],
-        },
-    },
-    "184-Tm(HL) 6.7618 Tm": {
-        "projectile": {"Z": 69, "A": 184, "brho": 6.7618, "charge_state": 1},
-        "materials": {
-            "F0": ["Be 5 mm"],
-            "F1": ["Al 1.4 mm"],
-            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC", "Al 0.2 mm"],
-            "F5": ["PPAC", "PPAC", "Al 1 mm"],
-        },
-    },
-    "151-Hf(HL) 5.7146 Tm": {
-        "projectile": {"Z": 72, "A": 151, "brho": 5.7146, "charge_state": 1},
-        "materials": {
-            "F0": ["Be 2 mm"],
-            "F1": ["Ta 0.01 mm"],
-            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
-            "F5": ["PPAC", "Al 2 mm", "PPAC"],
-        },
-    },
-    "116-La(FS) 5.2088 Tm": {
-        "projectile": {"Z": 57, "A": 116, "brho": 5.2088, "charge_state": 0},
-        "materials": {
-            "F0": ["Be 3 mm"],
-            "F1": ["Al 1.4 mm"],
-            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
-            "F5": ["PPAC", "Al 1.5 mm", "PPAC"],
-        },
-    },
-}
-
-sample_name = st.sidebar.selectbox("Sample setup", list(samples.keys()), key="transmittance_sample")
-sample = samples[sample_name]
+preset_name = st.sidebar.selectbox("Configuration preset", list(configuration_presets.keys()), key="transmittance_preset")
+preset = configuration_presets[preset_name]
 
 
-if st.session_state.get("transmittance_loaded_sample") != sample_name:
-    sample_projectile = sample["projectile"]
-    st.session_state["transmittance_projectile_Z"] = sample_projectile["Z"]
-    st.session_state["transmittance_projectile_A"] = sample_projectile["A"]
-    st.session_state["transmittance_projectile_charge_state"] = sample_projectile["charge_state"]
+if st.session_state.get("transmittance_loaded_preset") != preset_name:
+    preset_projectile = preset["projectile"]
+    st.session_state["transmittance_projectile_Z"] = preset_projectile["Z"]
+    st.session_state["transmittance_projectile_A"] = preset_projectile["A"]
+    st.session_state["transmittance_projectile_charge_state"] = preset_projectile["charge_state"]
     st.session_state["transmittance_projectile_energy_unit"] = "Tm"
-    st.session_state["transmittance_projectile_brho"] = sample_projectile["brho"]
+    st.session_state["transmittance_projectile_brho"] = preset_projectile["brho"]
     st.session_state.pop("transmittance_selected_materials", None)
     st.session_state.pop("transmittance_j", None)
-    st.session_state["transmittance_loaded_sample"] = sample_name
+    st.session_state["transmittance_loaded_preset"] = preset_name
 
 projectile = input_projectile(
     use_url_params=True,
-    projectile=sample["projectile"],
+    projectile=preset["projectile"],
     key_prefix="transmittance_projectile",
 )
 projectile_Z = projectile["Z"]
@@ -79,7 +40,7 @@ charge_state = projectile["charge_state"]
 exp_correction = input_exp_correction()
 
 materials_by_stage = input_materials(
-    stages_with_materials=sample["materials"],
+    stages_with_materials=preset["materials"],
     key_prefix="transmittance",
 )
 

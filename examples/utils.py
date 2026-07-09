@@ -54,6 +54,45 @@ F5_deg_list = [
     "Al 10.0 mm 8.587 mrad",
 ]
 
+configuration_presets = {
+    "195-Ta(HL) 6.7618 Tm": {
+        "projectile": {"Z": 73, "A": 195, "brho": 6.7618, "charge_state": 1},
+        "materials": {
+            "F0": ["Be 5 mm"],
+            "F1": ["Al 1.4 mm"],
+            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
+            "F5": ["PPAC", "PPAC", "Al 1 mm"],
+        },
+    },
+    "184-Tm(HL) 6.7618 Tm": {
+        "projectile": {"Z": 69, "A": 184, "brho": 6.7618, "charge_state": 1},
+        "materials": {
+            "F0": ["Be 5 mm"],
+            "F1": ["Al 1.4 mm"],
+            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC", "Al 0.2 mm"],
+            "F5": ["PPAC", "PPAC", "Al 1 mm"],
+        },
+    },
+    "151-Hf(HL) 5.7146 Tm": {
+        "projectile": {"Z": 72, "A": 151, "brho": 5.7146, "charge_state": 1},
+        "materials": {
+            "F0": ["Be 2 mm"],
+            "F1": ["Ta 0.01 mm"],
+            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
+            "F5": ["PPAC", "Al 2 mm", "PPAC"],
+        },
+    },
+    "116-La(FS) 5.2088 Tm": {
+        "projectile": {"Z": 57, "A": 116, "brho": 5.2088, "charge_state": 0},
+        "materials": {
+            "F0": ["Be 3 mm"],
+            "F1": ["Al 1.4 mm"],
+            "F3": ["Plastic 0.1 mm", "PPAC", "Diamond 0.2 mm", "PPAC"],
+            "F5": ["PPAC", "Al 1.5 mm", "PPAC"],
+        },
+    },
+}
+
 clight = 299.792458  # mm/ns
 mnucleon = 931.49432  # MeV
 
